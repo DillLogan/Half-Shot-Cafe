@@ -1,0 +1,1123 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Half Shot Café</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&family=Fredoka:wght@500;600&family=Luckiest+Guy&family=Patrick+Hand&display=swap">
+<style>
+/* Layout: cut-out cardboard panels pinned to teal shop wallpaper; the shop floor is a cartoon side view */
+:root{
+  --ink:#2a1b12; --ink-soft:#6b5242;
+  --wall:#39a39b; --wall-2:#2f8c85; --paper:#fff3d6; --paper-2:#f6dfae;
+  --wood:#c27c43; --wood-2:#8a4f25; --floor:#f0d49c; --floor-2:#e3be7c;
+  --mustard:#f5b53a; --tomato:#e8513a; --leaf:#5fb847; --leaf-ink:#2f7d22; --sky:#bfe6ee; --steel:#cbd5d8; --board-green:#2e3d34;
+  /* names the game markup already uses */
+  --chalk:var(--ink); --dim:var(--ink-soft); --crema:var(--mustard); --berry:var(--tomato); --mint:var(--leaf); --line:rgba(42,27,18,.28);
+  --f-display:'Luckiest Guy','Arial Black',Impact,sans-serif;
+  --f-body:'Patrick Hand','Comic Sans MS','Chalkboard SE',cursive;
+  --f-num:'Fredoka','Arial Rounded MT Bold',system-ui,sans-serif;
+  --f-receipt:'Courier Prime','Courier New',monospace;
+  color-scheme:light;
+}
+html,body{background-color:var(--wall);color:var(--ink)}
+body{font-family:var(--f-body);font-size:17px;line-height:1.35;
+  background-image:repeating-linear-gradient(90deg,transparent 0 34px,var(--wall-2) 34px 39px)}
+*{box-sizing:border-box}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible{outline:3px solid var(--mustard);outline-offset:3px}
+button:disabled{cursor:not-allowed;opacity:.45}
+.wrap{max-width:760px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 48px;display:flex;flex-direction:column;gap:20px}
+
+/* shared cardboard look */
+.list,.scene,.log,.banner,.clock,.daylabel{background:var(--paper);border:3px solid var(--ink);box-shadow:5px 5px 0 var(--ink)}
+
+header{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px 16px}
+h1{font-family:var(--f-display);font-weight:400;font-size:clamp(2.3rem,9vw,3.4rem);line-height:.95;margin:0;color:var(--mustard);letter-spacing:.02em;transform:rotate(-2.5deg);transform-origin:left;
+  text-shadow:-2px -2px 0 var(--ink),2px -2px 0 var(--ink),-2px 2px 0 var(--ink),2px 2px 0 var(--ink),0 3px 0 var(--ink),5px 6px 0 var(--ink)}
+.tagline{color:var(--paper);font-size:1.05rem;margin:8px 0 0;text-shadow:1px 1px 0 var(--wall-2)}
+.daylabel{font-family:var(--f-display);font-size:1.35rem;line-height:1;padding:9px 14px 6px;border-radius:12px 8px 14px 9px;transform:rotate(3deg)}
+
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+@media (max-width:560px){.stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.stat{position:relative;background:var(--paper);border:3px solid var(--ink);border-radius:6px 16px 16px 6px;box-shadow:4px 4px 0 var(--ink);padding:8px 10px 9px 26px;min-width:0}
+.stat:nth-child(odd){transform:rotate(-1.4deg)} .stat:nth-child(even){transform:rotate(1.1deg)}
+.stat::before{content:"";position:absolute;left:8px;top:50%;width:9px;height:9px;margin-top:-5px;border-radius:50%;background:var(--wall);border:2px solid var(--ink)}
+.stat .k{font-size:.8rem;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-soft)}
+.stat .v{font-family:var(--f-num);font-size:1.3rem;font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.15}
+.stat .s{font-size:.9rem;color:var(--ink-soft);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bar{height:9px;background:var(--paper-2);border:2px solid var(--ink);border-radius:6px;margin-top:5px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--mustard);transition:width .4s}
+
+.tabs{display:flex;gap:6px;padding-left:10px;position:relative;z-index:1;margin-bottom:-3px}
+.tabs button{background:var(--paper-2);border:3px solid var(--ink);border-bottom:0;border-radius:12px 14px 0 0;padding:8px 13px 5px;font-family:var(--f-display);font-size:1.05rem;letter-spacing:.03em;color:var(--ink-soft);transform:translateY(4px)}
+.tabs button[aria-selected="true"]{background:var(--paper);color:var(--ink);transform:none;padding-bottom:9px}
+
+.list{display:flex;flex-direction:column;border-radius:4px 14px 12px 14px;padding:4px 16px 14px}
+.item{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:10px;padding:12px 0;border-bottom:2px dashed var(--line)}
+.item b{font-family:var(--f-display);font-weight:400;font-size:1.12rem;letter-spacing:.02em}
+.sub{display:block;font-size:.95rem;color:var(--ink-soft)}
+.sub .good{color:var(--leaf-ink)} .sub .bad{color:var(--tomato)}
+.stepper{display:flex;align-items:center;gap:7px}
+.stepper button{width:38px;height:38px;border-radius:50%;background:var(--mustard);border:3px solid var(--ink);box-shadow:2px 3px 0 var(--ink);font-family:var(--f-num);font-weight:600;font-size:1.2rem;line-height:1;padding:0}
+.stepper button:active,.btn:active,.speeds button:active{transform:translate(2px,3px);box-shadow:0 0 0 var(--ink)}
+.price{font-family:var(--f-num);font-weight:600;min-width:62px;text-align:center;font-variant-numeric:tabular-nums;font-size:1.15rem}
+.btns{display:flex;gap:7px;flex-wrap:wrap;justify-content:flex-end}
+.btn{background:#fff;border:3px solid var(--ink);border-radius:9px 7px 10px 8px;box-shadow:3px 3px 0 var(--ink);padding:6px 11px;font-size:1rem;white-space:nowrap}
+.btn .m{font-family:var(--f-num);font-weight:600;color:var(--tomato)}
+.owned{font-family:var(--f-display);font-size:.9rem;letter-spacing:.04em;color:var(--paper);background:var(--leaf);border:3px solid var(--ink);border-radius:8px;padding:5px 9px 3px;transform:rotate(-4deg);display:inline-block;box-shadow:2px 2px 0 var(--ink)}
+.note{font-size:1rem;color:var(--ink-soft);margin:12px 0 0}
+.note strong{color:var(--ink)}
+
+.open{display:flex;flex-direction:column;gap:8px;align-items:stretch}
+.big{background:var(--tomato);color:var(--paper);border:3px solid var(--ink);border-radius:14px 10px 16px 12px;box-shadow:6px 6px 0 var(--ink);padding:14px 18px 11px;font-family:var(--f-display);font-size:1.6rem;letter-spacing:.03em;transform:rotate(-.8deg);
+  text-shadow:2px 2px 0 var(--ink)}
+.big:hover{filter:brightness(1.06)}
+.big:active{transform:rotate(-.8deg) translate(4px,5px);box-shadow:1px 1px 0 var(--ink)}
+
+/* running */
+.scene{position:relative;border-radius:14px 10px 16px 12px;overflow:hidden;background:var(--sky)}
+canvas{display:block;width:100%;height:290px}
+.runbar{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px}
+.clock{font-family:var(--f-display);font-size:1.8rem;line-height:1;padding:9px 14px 5px;border-radius:10px 14px 9px 12px;transform:rotate(-2deg);font-variant-numeric:tabular-nums}
+.speeds{display:flex;gap:6px}
+.speeds button{background:var(--paper);border:3px solid var(--ink);border-radius:9px;box-shadow:3px 3px 0 var(--ink);padding:5px 11px;font-family:var(--f-num);font-weight:600;font-size:.95rem}
+.speeds button[aria-pressed="true"]{background:var(--mustard)}
+.live{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+@media (max-width:560px){.live{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.log{font-size:1rem;color:var(--ink-soft);display:flex;flex-direction:column;gap:3px;max-height:170px;overflow:auto;margin:0;padding:10px 14px;list-style:none;border-radius:12px 8px 12px 10px}
+.log li.warn{color:var(--tomato)} .log li.ok{color:var(--leaf-ink)}
+
+/* receipt, taped up */
+.receipt{background:#fffdf6;color:var(--ink);font-family:var(--f-receipt);font-size:.85rem;padding:30px 20px 34px;max-width:420px;width:100%;margin:0 auto;position:relative;transform:rotate(1.5deg);
+  filter:drop-shadow(5px 6px 0 var(--ink));
+  -webkit-mask:radial-gradient(circle 6px at 50% 100%,transparent 98%,#000) 0 0/14px 100% repeat-x;mask:radial-gradient(circle 6px at 50% 100%,transparent 98%,#000) 0 0/14px 100% repeat-x}
+.receipt::before{content:"";position:absolute;top:0;left:50%;width:110px;height:22px;margin-left:-55px;background:rgba(245,181,58,.7);transform:rotate(-3deg)}
+.receipt h2{font-family:var(--f-display);font-weight:400;font-size:1.8rem;letter-spacing:.03em;text-align:center;margin:0;color:var(--tomato)}
+.receipt .c{text-align:center;color:var(--ink-soft);margin:2px 0 12px}
+.receipt hr{border:0;border-top:2px dashed var(--ink-soft);margin:10px 0}
+.rl{display:flex;justify-content:space-between;gap:10px;font-variant-numeric:tabular-nums}
+.rl.tot{font-weight:700;font-size:1.02rem}
+.rl .neg{color:#b23a22} .rl .pos{color:var(--leaf-ink)}
+.tips{margin:12px 0 0;padding:0 0 0 18px;font-family:var(--f-body);font-size:1.02rem;color:var(--ink)}
+.tips li{margin:4px 0}
+.banner{border-radius:12px 16px 10px 14px;padding:14px 16px;text-align:center;transform:rotate(-1deg)}
+.banner b{font-family:var(--f-display);font-weight:400;font-size:1.5rem;letter-spacing:.03em;color:var(--tomato);display:block}
+
+footer{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;color:var(--paper);font-size:.95rem;border-top:3px dashed rgba(255,243,214,.45);padding-top:12px}
+.link{background:none;border:0;color:var(--paper);text-decoration:underline;padding:4px 0}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+.scene{background:var(--sky)}
+.runleft{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.rush{font-family:var(--f-display);font-size:1rem;letter-spacing:.03em;background:var(--tomato);color:var(--paper);border:3px solid var(--ink);border-radius:8px;padding:5px 10px 2px;box-shadow:3px 3px 0 var(--ink);transform:rotate(3deg);text-shadow:1px 1px 0 var(--ink)}
+.item.locked{opacity:.5}
+.item .tier{font-family:var(--f-num);font-weight:600;font-size:.85rem;color:var(--paper);background:var(--ink);border-radius:6px;padding:1px 7px;margin-right:6px;vertical-align:2px}
+.chip{font-family:var(--f-display);font-size:.85rem;letter-spacing:.04em;border:3px solid var(--ink);border-radius:8px;padding:5px 9px 3px;display:inline-block;background:var(--paper-2);color:var(--ink-soft)}
+.pips{display:inline-flex;gap:4px;vertical-align:-1px;margin-left:6px}
+.pips i{width:11px;height:11px;border:2px solid var(--ink);border-radius:50%;background:#fff}
+.pips i.on{background:var(--leaf)}
+.perk{color:var(--leaf-ink)}
+.summary{display:flex;justify-content:space-between;flex-wrap:wrap;gap:4px 12px;padding:12px 0 8px;border-bottom:2px dashed var(--line);font-size:1rem}
+.summary b{font-family:var(--f-num);font-weight:600}
+.alert{background:var(--mustard);border:3px solid var(--ink);border-radius:10px 14px 9px 12px;box-shadow:4px 4px 0 var(--ink);padding:10px 14px;font-size:1.02rem;transform:rotate(-.6deg)}
+.alert.hot{background:var(--tomato);color:var(--paper)}
+.alert b{font-family:var(--f-display);font-weight:400;letter-spacing:.03em}
+.btn.go{background:var(--leaf);color:var(--ink)}
+.btn.go .m{color:var(--ink)}
+@media (max-width:480px){.tabs{gap:4px;padding-left:4px}.tabs button{padding:7px 8px 4px;font-size:.9rem}}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header>
+    <div>
+      <h1>Half Shot Café</h1>
+      <p class="tagline" id="tagline">A folding table on the sidewalk outside your apartment.</p>
+    </div>
+    <div class="daylabel" id="daylabel">Day 1 · Mon</div>
+  </header>
+
+  <section class="stats" id="stats"></section>
+
+  <main id="main"></main>
+
+  <footer>
+    <span id="footnote"></span>
+    <span id="resetwrap"><button class="link" data-act="reset">New game</button></span>
+  </footer>
+</div>
+
+<script>
+(() => {
+const $ = s => document.querySelector(s);
+const compact = a => a >= 1e9 ? (a / 1e9).toFixed(a >= 1e10 ? 1 : 2) + 'B' : a >= 1e6 ? (a / 1e6).toFixed(a >= 1e7 ? 1 : 2) + 'M' : (a / 1e3).toFixed(a >= 1e5 ? 0 : 1) + 'K';
+const money = n => { const a = Math.abs(n), s = n < 0 ? '−$' : '$'; return s + (a < 1000 ? a.toFixed(2) : a < 1e4 ? Math.round(a).toLocaleString() : compact(a)); };
+const money0 = n => { const a = Math.abs(n), s = n < 0 ? '−$' : '$'; return s + (a < 1e5 ? Math.round(a).toLocaleString() : compact(a)); };
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const rand = (a, b) => a + Math.random() * (b - a);
+const nice = x => { const e = 10 ** Math.floor(Math.log10(x)), f = x / e; return (f < 1.5 ? 1 : f < 2.25 ? 2 : f < 3.5 ? 2.5 : f < 7.5 ? 5 : 10) * e; };
+const roundTo = (v, s) => Math.max(s, Math.round(v / s) * s);
+
+const DAYS = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+const DOW = [0.9, 0.95, 1, 1, 1.1, 1.3, 1.2];
+// Half-hour arrival weights, 7:00 AM to 7:00 PM: morning peak, lunch peak, afternoon slump, last-call rush
+const SLOTS = [1.6,2.6,3.0,2.8,2.2,1.6, 1.1,0.9,0.9,1.4, 2.2,2.4,1.8,1.2, 0.8,0.7,0.9,1.0,0.8,0.9, 1.2,1.6,2.0,2.2];
+const SSUM = SLOTS.reduce((a, b) => a + b, 0), SMAX = Math.max(...SLOTS);
+const OPEN = 7 * 3600, CLOSE = 19 * 3600;
+const GS = 480; // game seconds per real second at 1x (12 h ≈ 90 s)
+const SAVE = 'halfshot-v2';
+
+const LOC = [
+  {name:'Folding table', where:'A folding table on the sidewalk outside your apartment.', rent:0, move:0, pm:0.85, vb:22, vr:0.35, staff:1, slots:1, q:4, scene:'table', crowd:'human', earth:true,
+   pal:{wall:'#5fa8d3','wall-2':'#4f97c2',sky:'#bfe6ee',floor:'#c9c4ba','floor-2':'#b8b3a8',wood:'#f3f0e6','wood-2':'#9a958b'}},
+  {name:'Food truck', where:'A rented food truck parked by the office park.', rent:1000, move:2000, pm:1.1, vb:45, vr:0.8, staff:2, slots:1, q:6, scene:'truck', crowd:'human', earth:true,
+   pal:{wall:'#e0913a','wall-2':'#cf7f2a',sky:'#bfe6ee',floor:'#6d6a70','floor-2':'#5f5c62',wood:'#e8513a','wood-2':'#b23a22'}},
+  {name:'Small shop', where:'A narrow little shop on Elm Street.', rent:2500, move:5000, pm:1.5, vb:90, vr:1.5, staff:3, slots:2, q:8, scene:'small', crowd:'human', earth:true,
+   pal:{wall:'#39a39b','wall-2':'#2f8c85',sky:'#bfe6ee',floor:'#f0d49c','floor-2':'#e3be7c',wood:'#c27c43','wood-2':'#8a4f25'}},
+  {name:'Downtown flagship', where:'Brick walls, big windows and too many plants. Downtown.', rent:10000, move:20000, pm:2.6, vb:110, vr:2, staff:4, slots:2, q:10, scene:'downtown', crowd:'human', earth:true,
+   pal:{wall:'#a8483a','wall-2':'#93392c',sky:'#ffd59a',floor:'#c98f5a','floor-2':'#b57d4b',wood:'#6b4a33','wood-2':'#4a3222'}},
+  {name:'Orbital café', where:'A café ring on a space station in low Earth orbit.', rent:50000, move:100000, pm:9, vb:130, vr:2.2, staff:5, slots:3, q:11, scene:'orbital', crowd:'orbital', zeroG:true,
+   pal:{wall:'#1f2a4d','wall-2':'#18213f',sky:'#0b0e1a',floor:'#8f98a6','floor-2':'#7d8694',wood:'#e7ebf0','wood-2':'#b8c0cc'}},
+  {name:'Moon base café', where:'Under the dome at Tranquility Base.', rent:250000, move:500000, pm:40, vb:150, vr:2.4, staff:5, slots:3, q:12, scene:'moon', crowd:'moon',
+   pal:{wall:'#4a4f5c','wall-2':'#3d424e',sky:'#0b0e1a',floor:'#b7b9bd','floor-2':'#a6a8ad',wood:'#dfe3e8','wood-2':'#9aa3ad'}},
+  {name:'Mars dome franchise', where:'A pressurized dome in Jezero Crater, Mars.', rent:1.5e6, move:3e6, pm:210, vb:160, vr:2.6, staff:6, slots:4, q:12, scene:'mars', crowd:'mars',
+   pal:{wall:'#b5532b','wall-2':'#9c4422',sky:'#e9a07a',floor:'#d98a5a','floor-2':'#c97a4a',wood:'#f2e6d8','wood-2':'#c9b49e'}},
+  {name:'Event horizon café', where:'Parked at the edge of a black hole. Time runs a little slow in here.', rent:10e6, move:20e6, pm:1300, vb:170, vr:2.8, staff:6, slots:4, q:12, scene:'blackhole', crowd:'cosmic',
+   pal:{wall:'#1a1028','wall-2':'#120a1d',sky:'#0a0612',floor:'#2a1840','floor-2':'#22123a',wood:'#5a3d8a','wood-2':'#3f2a66'}},
+  {name:'Multiverse coffee empire', where:'Every timeline at once. Every customer is a version of you.', rent:100e6, move:200e6, pm:11000, vb:180, vr:3, staff:6, slots:4, q:12, scene:'multiverse', crowd:'you',
+   pal:{wall:'#7a3fa0','wall-2':'#6a318f',sky:'#ff8fc8',floor:'#ffd6f0','floor-2':'#c9f2ff',wood:'#ffffff','wood-2':'#c7b6ff'}},
+];
+const FINAL = LOC.length - 1;
+
+const DRINKS = [
+  {id:'drip',  name:'Drip coffee', base:2.50, lb:0.035, gal:0,      t:50,  mach:false},
+  {id:'esp',   name:'Espresso',    base:3.00, lb:0.040, gal:0,      t:90,  mach:true},
+  {id:'cap',   name:'Cappuccino',  base:4.25, lb:0.040, gal:0.04,   t:150, mach:true},
+  {id:'latte', name:'Latte',       base:4.75, lb:0.040, gal:0.0625, t:160, mach:true},
+  {id:'cold',  name:'Cold brew',   base:4.50, lb:0.060, gal:0,      t:40,  mach:false},
+];
+const DMAP = Object.fromEntries(DRINKS.map(d => [d.id, d]));
+const PASTRY_BASE = 3.5;
+const WEATHER = [
+  {id:'sun',  p:.3,  temp:[74,90], traffic:1.1,  w:{drip:1,  esp:.6, cap:.7, latte:1,   cold:2.4}},
+  {id:'mild', p:.35, temp:[58,73], traffic:1,    w:{drip:1.2,esp:.8, cap:1,  latte:1.4, cold:.9}},
+  {id:'rain', p:.2,  temp:[48,62], traffic:.72,  w:{drip:1.3,esp:.8, cap:1.3,latte:1.9, cold:.3}},
+  {id:'cold', p:.15, temp:[26,42], traffic:.85,  w:{drip:1.6,esp:1,  cap:1.4,latte:1.7, cold:.1}},
+];
+const WNAMES = {
+  earth:{sun:'Sunny', mild:'Partly cloudy', rain:'Rainy', cold:'Cold snap'},
+  space:{sun:'Solar maximum', mild:'Calm orbit', rain:'Meteor shower', cold:'Eclipse'},
+  mars:{sun:'Clear and dusty', mild:'Hazy', rain:'Dust storm', cold:'Polar night'},
+  weird:{sun:'Time runs fast', mild:'Reality stable', rain:'Gravity tide', cold:'Time runs slow'},
+};
+const wgroup = () => S.tier <= 3 ? 'earth' : S.tier <= 5 ? 'space' : S.tier === 6 ? 'mars' : 'weird';
+const wname = id => WNAMES[wgroup()][id];
+const SUP = {
+  beans:  {name:'Coffee beans', pack:5,   packName:'5 lb bag',   cost:58,  fmt:v => v.toFixed(1)+' lb'},
+  milk:   {name:'Whole milk',   pack:1,   packName:'1 gal',      cost:4.6, fmt:v => v.toFixed(2)+' gal'},
+  cups:   {name:'Cups & lids',  pack:100, packName:'100 cups',   cost:11,  fmt:v => Math.round(v)+' cups'},
+  pastry: {name:'Croissants',   pack:12,  packName:'tray of 12', cost:16,  fmt:v => Math.round(v)+' in case'},
+};
+const UPG = [
+  {id:'sign',     name:'Sidewalk chalkboard sign', cost:180,  desc:'Catches foot traffic: about 12% more visitors.'},
+  {id:'music',    name:'Sound system',             cost:420,  desc:'A good playlist. People wait about 20% longer.'},
+  {id:'grinder',  name:'Burr grinder',             cost:650,  desc:'Better shots. Customers pay more and leave happier.'},
+  {id:'seating',  name:'Window seating',           cost:1100, desc:'Longer patience, 3 more spots in line, more pastry sales.'},
+  {id:'machine2', name:'Second espresso machine',  cost:2400, desc:'Two more espresso drinks can be made at the same time.'},
+];
+const EXP = [
+  {id:'market',     name:'Weekend farmers-market stall',      tier:1, cost:800,   up:25,    inc:220,   v:.25, weekend:true, desc:'Sells bags of drip on Saturdays and Sundays only.'},
+  {id:'catering',   name:'Office catering contracts',         tier:2, cost:4000,  up:90,    inc:260,   v:.2,  desc:'Coffee boxes for meetings around town. Scales with reputation.'},
+  {id:'roaster',    name:'In-house bean roaster',             tier:2, cost:9000,  up:60,    inc:250,   v:.15, perk:'Beans cost 35% less', desc:'Roast your own and sell the extra wholesale.'},
+  {id:'bottled',    name:'Bottled cold brew in grocery stores', tier:3, cost:30000, up:300, inc:1500,  v:.25, weather:true, desc:'Huge on hot days. Cold snaps can lose money.'},
+  {id:'franchise',  name:'Franchise licensing',               tier:3, cost:120000, up:800,  inc:5000,  v:.2,  desc:'Other owners pay to use your name. Royalties grow with reputation.'},
+  {id:'drones',     name:'Zero-G drone delivery fleet',       tier:4, cost:600000, up:6000, inc:30000, v:.2,  perk:'+8% shop visitors per level', desc:'Delivers lattes to every module on the station.'},
+  {id:'vending',    name:'Lunar mining-colony vending',       tier:5, cost:3e6,   up:25000, inc:150000, v:.2, breakdown:.05, desc:'Machines in every mine shaft. About 1 day in 20 they break down and earn nothing.'},
+  {id:'plantation', name:'Terraformed coffee plantation',     tier:6, cost:20e6,  up:150000, inc:1e6,  v:.15, perk:'Beans cost 60% less', desc:'The first coffee grown on another planet. Exports pay well.'},
+  {id:'timeloop',   name:'Time-loop roastery',                tier:7, cost:150e6, up:1e6,   inc:7e6,   v:.6,  desc:'Beans aged 1,000 years in one second. Wild day-to-day swings.'},
+];
+const EMAP = Object.fromEntries(EXP.map(e => [e.id, e]));
+const WF = {sun:1.6, mild:1, rain:.55, cold:.2};
+const MAXLVL = 5;
+
+function rollWeather() {
+  let r = Math.random(), w = WEATHER[0];
+  for (const x of WEATHER) { if (r < x.p) { w = x; break; } r -= x.p; }
+  return {id: w.id, temp: Math.round(rand(...w.temp))};
+}
+const W_OF = id => WEATHER.find(w => w.id === id);
+
+function newGame() {
+  const pm = LOC[0].pm, st = nice(pm * 0.25);
+  const prices = {}; for (const d of DRINKS) prices[d.id] = roundTo(d.base * pm, st); prices.pastry = roundTo(PASTRY_BASE * pm, st);
+  return {day:1, tier:0, cash:250, rep:20, staff:1, up:{}, exp:{}, rentDue:0,
+    inv:{beans:2, milk:1, cups:60, pastry:0}, prices,
+    weather:rollWeather(), forecast:rollWeather(), history:[], won:false, over:false, overWhy:''};
+}
+function load() { try { const s = JSON.parse(localStorage.getItem(SAVE)); return s && s.prices && s.exp ? s : null; } catch (e) { return null; } }
+function save() { try { localStorage.setItem(SAVE, JSON.stringify(S)); } catch (e) {} }
+
+let S = load() || newGame();
+let phase = 'plan', tab = 'menu', sim = null, report = null, confirmReset = false, confirmMove = false, welcome = null;
+
+const LC = () => LOC[S.tier];
+const priceStep = () => nice(LC().pm * 0.25);
+const beanMult = () => (S.exp.roaster ? 0.65 : 1) * (S.exp.plantation ? 0.4 : 1);
+const supCost = k => SUP[k].cost * LC().pm * 0.9 * (k === 'beans' ? beanMult() : 1);
+const drinkCost = d => d.lb * supCost('beans') / SUP.beans.pack + d.gal * supCost('milk') + supCost('cups') / SUP.cups.pack;
+const wage = () => 112 * Math.pow(LC().pm, 0.9);
+const quality = () => 0.55 + (S.up.grinder ? 0.15 : 0);
+const slots = () => LC().slots + (S.up.machine2 ? 2 : 0);
+const maxQ = () => LC().q + (S.up.seating ? 3 : 0);
+const expectedVisitors = () => (LC().vb + S.rep * LC().vr) * (S.up.sign ? 1.12 : 1) * (1 + 0.08 * (S.exp.drones || 0)) * DOW[(S.day - 1) % 7] * W_OF(S.weather.id).traffic;
+const fmtTime = t => { const h = Math.floor(t / 3600), m = Math.floor(t % 3600 / 60); const hh = ((h + 11) % 12) + 1; return hh + ':' + String(m).padStart(2,'0') + (h < 12 ? ' AM' : ' PM'); };
+const rentIn = () => S.rentDue - S.day + 1;
+
+/* expansions */
+const expInc = (e, L) => e.inc * Math.pow(1.4, L - 1);
+const expUp = (e, L) => e.up * Math.pow(1.3, L - 1);
+const expCost = (e, L) => e.cost * Math.pow(1.6, L - 1); // price of reaching level L
+function expNet(e, L) {
+  if (!L) return 0;
+  return expInc(e, L) * (0.5 + S.rep / 100) * (e.weekend ? 2 / 7 : 1) * (e.weather ? 0.97 : 1) * (e.breakdown ? 1 - e.breakdown : 1) - expUp(e, L);
+}
+const expTotal = () => EXP.reduce((a, e) => a + expNet(e, S.exp[e.id] || 0), 0);
+
+/* ---------- theme ---------- */
+function applyTheme() {
+  const p = LC().pal, r = document.documentElement.style;
+  for (const k of ['wall','wall-2','sky']) r.setProperty('--' + k, p[k]);
+}
+
+/* ---------- status ---------- */
+function renderStats() {
+  const L = LC(), nxt = LOC[S.tier + 1], earth = wgroup() === 'earth';
+  const w = S.weather, f = S.forecast;
+  $('#daylabel').textContent = 'Day ' + S.day + ' · ' + DAYS[(S.day - 1) % 7];
+  $('#tagline').textContent = L.where;
+  const due = rentIn();
+  $('#stats').innerHTML = `
+    <div class="stat"><div class="k">Cash</div><div class="v" style="color:${S.cash < Math.max(300, L.rent * 0.5) ? 'var(--tomato)' : 'var(--ink)'}">${money0(S.cash)}</div>
+      ${nxt ? `<div class="bar"><i style="width:${clamp(S.cash / nxt.move * 100, 0, 100)}%"></i></div><div class="s">${nxt.name} at ${money0(nxt.move)}</div>` : '<div class="s">Top of the ladder</div>'}</div>
+    <div class="stat"><div class="k">Reputation</div><div class="v">${Math.round(S.rep)}<span style="color:var(--dim);font-size:.8rem"> / 100</span></div>
+      <div class="bar"><i style="width:${S.rep}%;background:var(--mint)"></i></div></div>
+    <div class="stat"><div class="k">Weather</div><div class="v">${earth ? w.temp + '°F' : wname(w.id)}</div><div class="s">${earth ? wname(w.id) + ' · ' : ''}Tomorrow: ${wname(f.id)}</div></div>
+    <div class="stat"><div class="k">Rent</div>${L.rent ? `<div class="v">${money0(L.rent)}<span style="color:var(--dim);font-size:.8rem">/mo</span></div>
+      <div class="s" style="${due <= 3 ? 'color:var(--tomato)' : ''}">${due <= 1 ? 'Due tonight' : 'Due in ' + due + ' days'}</div>` : `<div class="v">$0</div><div class="s">The sidewalk is free</div>`}</div>`;
+  $('#footnote').textContent = (L.rent ? 'Rent billed every 30 days' : 'No rent yet') + ' · Hired baristas ' + money0(wage()) + '/day · Unsold croissants are tossed at close';
+}
+
+/* ---------- planning ---------- */
+function renderPlan() {
+  const L = LC(), w = W_OF(S.weather.id);
+  const favored = Object.entries(w.w).sort((a, b) => b[1] - a[1]).slice(0, 2).map(([id]) => DMAP[id].name).join(' and ');
+  const exp = Math.round(expectedVisitors()), st = priceStep();
+  let body = '';
+  const priceRow = (id, name, base, cost, extra) => {
+    const p = S.prices[id], vs = p / (base * L.pm);
+    const tag = vs > 1.15 ? '<span class="bad">above typical</span>' : vs < 0.9 ? '<span class="good">a bargain</span>' : 'typical price';
+    return `<div class="item"><div><b>${name}</b><span class="sub">Costs ${money(cost)}${extra} · ${money(p - cost)} margin · ${tag}</span></div>
+      <div class="stepper"><button data-act="price" data-id="${id}" data-d="-1" aria-label="Lower ${name} price">−</button><span class="price">${money(p)}</span><button data-act="price" data-id="${id}" data-d="1" aria-label="Raise ${name} price">+</button></div></div>`;
+  };
+  if (tab === 'menu') {
+    body = DRINKS.map(d => priceRow(d.id, d.name, d.base, drinkCost(d), ' to make')).join('') +
+      priceRow('pastry', 'Croissant', PASTRY_BASE, supCost('pastry') / SUP.pastry.pack, '') +
+      `<p class="note">${wname(w.id)} days push people toward <strong>${favored}</strong>. What customers will pay rises with reputation and coffee quality. Prices move in ${money(st)} steps here.</p>`;
+  } else if (tab === 'supplies') {
+    const drinksLeft = {beans: Math.floor(S.inv.beans / 0.042), milk: Math.floor(S.inv.milk / 0.05), cups: S.inv.cups, pastry: S.inv.pastry};
+    body = Object.entries(SUP).map(([k, s]) => {
+      const c = supCost(k);
+      const hint = k === 'pastry' ? 'Fresh today only' : `≈ ${drinksLeft[k]} ${k === 'milk' ? 'milk drinks' : 'drinks'}`;
+      return `<div class="item"><div><b>${s.name}</b><span class="sub">${s.fmt(S.inv[k])} on hand · ${hint}</span></div>
+        <div class="btns"><button class="btn" data-act="buy" data-id="${k}" data-n="1" ${S.cash < c ? 'disabled' : ''}>+${s.packName} <span class="m">${money(c)}</span></button>
+        <button class="btn" data-act="buy" data-id="${k}" data-n="5" ${S.cash < c * 5 ? 'disabled' : ''}>×5</button></div></div>`;
+    }).join('') + `<p class="note">Expect about <strong>${exp} visitors</strong> today. Rushes hit around <strong>7:30–9:30</strong>, <strong>noon–1:30</strong> and <strong>5:30–7</strong>. Roughly 3 in 10 want a croissant.</p>`;
+  } else if (tab === 'staff') {
+    const hired = S.staff - 1;
+    body = `<div class="item"><div><b>Baristas: ${S.staff} of ${L.staff}</b><span class="sub">You${hired ? ' + ' + hired + ' hired' : ' alone'} · ${slots()} espresso drinks at once · ${money0(hired * wage())}/day in wages</span></div>
+      <div class="btns"><button class="btn" data-act="fire" ${hired ? '' : 'disabled'}>Let one go</button>
+      <button class="btn" data-act="hire" ${S.staff >= L.staff ? 'disabled' : ''}>Hire <span class="m">${money0(wage())}/day</span></button></div></div>` +
+      UPG.map(u => `<div class="item"><div><b>${u.name}</b><span class="sub">${u.desc}</span></div>
+        <div class="btns">${S.up[u.id] ? '<span class="owned">Installed</span>' : `<button class="btn" data-act="upg" data-id="${u.id}" ${S.cash < u.cost ? 'disabled' : ''}>Buy <span class="m">${money0(u.cost)}</span></button>`}</div></div>`).join('') +
+      `<p class="note">${S.staff >= L.staff ? `A ${L.name.toLowerCase()} only fits ${L.staff} behind the counter. Move up to hire more.` : 'The morning rush is where an extra barista pays off.'}</p>`;
+  } else if (tab === 'expand') {
+    const tot = expTotal();
+    const visible = EXP.filter(e => e.tier <= S.tier + 1);
+    body = `<div class="summary"><span>Expansions earn about</span><b style="color:${tot < 0 ? 'var(--tomato)' : 'var(--leaf-ink)'}">${money0(tot)}/day after upkeep</b></div>` +
+      (visible.length ? visible.map(e => {
+        const L0 = S.exp[e.id] || 0, locked = e.tier > S.tier;
+        const pips = `<span class="pips" aria-label="Level ${L0} of ${MAXLVL}">${Array.from({length:MAXLVL}, (_, i) => `<i class="${i < L0 ? 'on' : ''}"></i>`).join('')}</span>`;
+        const cost = expCost(e, L0 + 1), gain = expNet(e, L0 + 1) - expNet(e, L0);
+        const pay = gain > 0 ? Math.ceil(cost / gain) : null;
+        let right;
+        if (locked) right = `<span class="chip">At ${LOC[e.tier].name}</span>`;
+        else if (L0 >= MAXLVL) right = '<span class="owned">Maxed</span>';
+        else right = `<button class="btn ${L0 ? '' : 'go'}" data-act="exp" data-id="${e.id}" ${S.cash < cost ? 'disabled' : ''}>${L0 ? 'Level up' : 'Open'} <span class="m">${money0(cost)}</span></button>`;
+        const now = L0 ? `Level ${L0}: earns ~${money0(expInc(e, L0) * (0.5 + S.rep / 100))}${e.weekend ? ' a weekend day' : '/day'}, upkeep ${money0(expUp(e, L0))}/day. ` : `Upkeep ${money0(expUp(e, 1))}/day. `;
+        const next = !locked && L0 < MAXLVL ? (pay ? `Next level adds ~${money0(gain)}/day and pays back in ~${pay} days.` : 'Next level barely covers its upkeep right now.') : '';
+        return `<div class="item ${locked ? 'locked' : ''}"><div><b>${e.name}</b>${pips}<span class="sub">${e.desc}${e.perk ? ` <span class="perk">${e.perk}.</span>` : ''}</span><span class="sub">${now}${next}</span></div><div class="btns">${right}</div></div>`;
+      }).join('') : '') +
+      (S.tier === 0 ? `<p class="note">Expansions start once you move into a food truck.</p>` : `<p class="note">Income scales with reputation and swings day to day. Upkeep is charged every night, good day or bad.</p>`);
+  } else {
+    body = LOC.map((l, i) => {
+      let right;
+      if (i === S.tier) right = '<span class="owned">You\'re here</span>';
+      else if (i < S.tier) right = '<span class="chip">Outgrown</span>';
+      else if (i === S.tier + 1) {
+        if (confirmMove) right = `<button class="btn go" data-act="move-yes">Pay ${money0(l.move)} and move</button><button class="btn" data-act="move-no">Cancel</button>`;
+        else right = S.cash >= l.move ? `<button class="btn go" data-act="move">Move here <span class="m">${money0(l.move)}</span></button>` : `<span class="chip">Need ${money0(l.move - S.cash)} more</span>`;
+      } else right = '<span class="chip">Locked</span>';
+      const facts = i === 0 ? 'No rent' : `${money0(l.rent)}/mo rent · ${money0(l.move)} to move in (deposit + first month)`;
+      return `<div class="item ${i > S.tier + 1 ? 'locked' : ''}"><div><b><span class="tier">${i + 1}</span>${l.name}</b><span class="sub">${l.where}</span>
+        <span class="sub">${facts} · up to ${l.staff} barista${l.staff > 1 ? 's' : ''}, line of ${l.q} · drinks sell for ~${(l.pm).toLocaleString()}× sidewalk prices</span></div><div class="btns">${right}</div></div>`;
+    }).join('') + `<p class="note">Moving is optional. Bigger places bring more customers who pay more, but the rent bill comes every 30 days whether you're ready or not. Your prices scale up automatically when you move.</p>`;
+  }
+  const tabs = [['menu','Menu'],['supplies','Supplies'],['staff','Staff'],['expand','Expand'],['move','Move']];
+  const L1 = LOC[S.tier + 1];
+  let alerts = '';
+  if (welcome) alerts += `<div class="alert"><b>Welcome to the ${welcome}.</b> Prices were scaled up to match the new neighborhood.${S.tier === FINAL ? ` You built a multiverse coffee empire in ${S.day - 1} days. Keep playing as long as you like.` : ''}</div>`;
+  if (!S.over && L.rent && rentIn() <= 3) alerts += `<div class="alert ${S.cash < L.rent ? 'hot' : ''}"><b>Rent: ${money0(L.rent)}</b> due ${rentIn() <= 1 ? 'tonight at close' : 'in ' + rentIn() + ' days'}.${S.cash < L.rent ? ' You don\'t have it yet.' : ''}</div>`;
+  if (!S.over && L1 && S.cash >= L1.move && tab !== 'move') alerts += `<div class="alert">You can afford the <b>${L1.name}</b>. Check the Move tab.</div>`;
+  $('#main').innerHTML = `${alerts ? `<div style="display:flex;flex-direction:column;gap:12px;margin-bottom:18px">${alerts}</div>` : ''}
+    <div class="tabs" role="tablist">${tabs.map(([id, l]) => `<button role="tab" data-act="tab" data-id="${id}" aria-selected="${tab === id}">${l}</button>`).join('')}</div>
+    <div class="list">${body}</div>
+    <div class="open" style="margin-top:18px">${S.over ? `<div class="banner"><b>Closed for good</b>${S.overWhy || 'The shop ran out of money.'} Start a new game below.</div>` :
+      `<button class="big" data-act="open">Open the doors · 7:00 AM</button>`}</div>`;
+}
+
+/* ---------- simulation ---------- */
+function rateAt(t) {
+  const i = Math.floor((t - OPEN) / 1800);
+  if (i < 0 || i >= SLOTS.length) return 0;
+  return sim.visitors * SLOTS[i] / SSUM / 1800;
+}
+const nextArrival = t => t - Math.log(1 - Math.random()) / sim.maxRate;
+function rushLabel(t) {
+  const i = Math.floor((t - OPEN) / 1800);
+  if (i < 0 || i >= SLOTS.length || SLOTS[i] < 1.6) return '';
+  return t < 11 * 3600 ? 'Morning rush' : t < 15 * 3600 ? 'Lunch rush' : 'Last call';
+}
+
+function startDay() {
+  phase = 'run'; welcome = null;
+  sim = {t: OPEN, closed:false, queue:[], baristas: Array.from({length:S.staff}, () => ({busy:0, cust:null, start:0})),
+    mUsed:0, visitors: expectedVisitors() * rand(0.9, 1.1), arrived:0, served:0,
+    lost:{price:0, line:0, wait:0, stock:0}, sales:0, tips:0, pastrySold:0, satSum:0, waitSum:0,
+    sold:{}, stockOut:{}, hour:7, hServed:0, hLost:0, logs:[], people:[], floats:[], speed:1, done:false};
+  sim.maxRate = sim.visitors * SMAX / SSUM / 1800;
+  sim.next = nextArrival(OPEN);
+  renderRun();
+  addLog('7:00 AM · Doors open. ' + wname(S.weather.id) + (wgroup() === 'earth' ? ', ' + S.weather.temp + '°F.' : '.'));
+}
+
+function pickDrink() {
+  const w = W_OF(S.weather.id).w;
+  let tot = 0; for (const d of DRINKS) tot += w[d.id];
+  let r = Math.random() * tot;
+  for (const d of DRINKS) { if ((r -= w[d.id]) <= 0) return d; }
+  return DRINKS[0];
+}
+function wtpMult() { return (0.95 + S.rep / 300 + (quality() - 0.55)) * (0.85 + Math.random() * 0.5); }
+
+function arrive(t) {
+  sim.arrived++;
+  const pm = LC().pm, d = pickDrink(), wtp = d.base * pm * wtpMult();
+  const c = {d, wtp, arrival:t, pastry:false};
+  c.wantsPastry = Math.random() < (S.up.seating ? 0.38 : 0.28) && S.prices.pastry <= PASTRY_BASE * pm * wtpMult();
+  const patience = rand(480, 840) * (S.up.music ? 1.2 : 1) * (S.up.seating ? 1.25 : 1);
+  c.deadline = t + patience; c.patience = patience;
+  c.p = spawnPerson(c);
+  if (sim.queue.length >= maxQ()) return lose(c, 'line');
+  if (S.prices[d.id] > wtp) return lose(c, 'price');
+  sim.queue.push(c);
+  c.p.state = 'queue';
+}
+
+function lose(c, why) {
+  sim.lost[why]++; sim.hLost++;
+  const label = {price:'too pricey', line:'line too long', wait:'gave up waiting', stock:'sold out'}[why];
+  if (c.p) { c.p.state = 'balk'; c.p.balkT = why === 'wait' ? 0 : 0.5; floatText(c.p.x, c.p.y - 14, label, 'bad'); }
+}
+
+function startNext(b) {
+  while (sim.queue.length) {
+    const c = sim.queue[0], d = c.d;
+    if (d.mach && sim.mUsed >= slots()) return;
+    const short = S.inv.beans < d.lb ? 'beans' : S.inv.milk < d.gal ? 'milk' : S.inv.cups < 1 ? 'cups' : null;
+    sim.queue.shift();
+    if (short) {
+      if (!sim.stockOut[short]) { sim.stockOut[short] = true; addLog(fmtTime(sim.t) + ' · Out of ' + short + '!', 'warn'); }
+      lose(c, 'stock'); continue;
+    }
+    S.inv.beans -= d.lb; S.inv.milk -= d.gal; S.inv.cups -= 1;
+    if (c.wantsPastry) {
+      if (S.inv.pastry > 0) { S.inv.pastry--; c.pastry = true; }
+      else if (!sim.stockOut.pastry) { sim.stockOut.pastry = true; addLog(fmtTime(sim.t) + ' · Croissants sold out.', 'warn'); }
+    }
+    if (d.mach) { sim.mUsed++; c.mach = true; }
+    c.start = sim.t;
+    b.cust = c; b.start = sim.t; b.busy = sim.t + d.t * rand(0.85, 1.15) + (c.pastry ? 25 : 0);
+    c.p.state = 'serve'; c.p.station = sim.baristas.indexOf(b);
+    return;
+  }
+}
+
+function finish(b) {
+  const c = b.cust, d = c.d;
+  const price = S.prices[d.id] + (c.pastry ? S.prices.pastry : 0);
+  sim.sales += price; sim.served++; sim.hServed++;
+  sim.sold[d.id] = (sim.sold[d.id] || 0) + 1;
+  if (c.pastry) sim.pastrySold++;
+  const wait = c.start - c.arrival; sim.waitSum += wait;
+  const ws = 1 - (wait / c.patience) * 1.4;
+  const ps = clamp((c.wtp - S.prices[d.id]) / S.prices[d.id] * 2, -1, 1);
+  const sat = clamp(0.5 * ws + 0.3 * ps + 0.1 + (quality() - 0.55) * 1, -1, 1);
+  sim.satSum += sat;
+  let tip = 0;
+  if (sat > 0.5 && Math.random() < 0.35) { tip = (0.5 + Math.floor(Math.random() * 4) * 0.5) * LC().pm; sim.tips += tip; }
+  if (c.mach) sim.mUsed--;
+  b.cust = null;
+  c.p.state = 'leave'; c.p.cup = true; c.p.happy = sat;
+  floatText(c.p.x, c.p.y - 14, '+' + money(price + tip), 'good');
+}
+
+function step(dt) {
+  const end = sim.t + dt;
+  while (!sim.closed && sim.next <= end && sim.next < CLOSE) {
+    if (Math.random() * sim.maxRate < rateAt(sim.next)) arrive(sim.next);
+    sim.next = nextArrival(sim.next);
+  }
+  sim.t = end;
+  for (let i = sim.queue.length - 1; i >= 0; i--) {
+    const c = sim.queue[i];
+    if (sim.t > c.deadline) { sim.queue.splice(i, 1); lose(c, 'wait'); }
+  }
+  for (const b of sim.baristas) {
+    if (b.cust && sim.t >= b.busy) finish(b);
+    if (!b.cust) startNext(b);
+  }
+  const h = Math.floor(sim.t / 3600);
+  if (h > sim.hour && sim.hour < 19) {
+    if (sim.hServed || sim.hLost) addLog(fmtTime(sim.hour * 3600) + ' hour · ' + sim.hServed + ' served' + (sim.hLost ? ', ' + sim.hLost + ' walked out' : ''), sim.hLost > 3 ? 'warn' : '');
+    sim.hServed = sim.hLost = 0; sim.hour = h;
+  }
+  if (!sim.closed && sim.t >= CLOSE) { sim.closed = true; addLog('7:00 PM · Doors locked. Finishing the line.'); }
+  if (sim.closed && !sim.queue.length && sim.baristas.every(b => !b.cust) && !sim.done) { sim.done = true; setTimeout(endDay, 700); }
+}
+
+function addLog(text, cls = '') {
+  sim.logs.unshift({text, cls});
+  const el = $('#log'); if (!el) return;
+  el.innerHTML = sim.logs.slice(0, 30).map(l => `<li class="${l.cls}">${l.text}</li>`).join('');
+}
+
+function runExpansions() {
+  const out = {inc:0, up:0, notes:[]};
+  const dow = (S.day - 1) % 7;
+  for (const e of EXP) {
+    const L = S.exp[e.id]; if (!L) continue;
+    out.up += expUp(e, L);
+    let inc = expInc(e, L) * (0.5 + S.rep / 100) * (1 + e.v * rand(-1, 1));
+    if (e.weekend && dow < 5) inc = 0;
+    if (e.weather) inc *= WF[S.weather.id];
+    if (e.breakdown && Math.random() < e.breakdown) { inc = 0; out.notes.push(e.name + ' broke down today and earned nothing.'); }
+    out.inc += Math.max(0, inc);
+  }
+  return out;
+}
+
+function endDay() {
+  if (!sim || phase !== 'run') return;
+  const L = LC();
+  const wages = (S.staff - 1) * wage();
+  const tossed = S.inv.pastry; S.inv.pastry = 0;
+  const ex = runExpansions();
+  let rentBill = 0;
+  if (L.rent && S.day >= S.rentDue) { rentBill = L.rent; S.rentDue += 30; }
+  const net = sim.sales + sim.tips - wages - rentBill + ex.inc - ex.up;
+  S.cash += net;
+  const lostAll = sim.lost.price + sim.lost.line + sim.lost.wait + sim.lost.stock;
+  const total = sim.served + lostAll;
+  let delta = (sim.satSum - 0.7 * (sim.lost.wait + sim.lost.line) - 0.9 * sim.lost.stock - 0.15 * sim.lost.price) / Math.max(total, 1) * 12 + sim.served / 120;
+  if (delta > 0) delta *= (1 - S.rep / 125);
+  delta = clamp(delta, -7, 7);
+  const oldRep = S.rep;
+  S.rep = clamp(S.rep + delta, 0, 100);
+  const best = Object.entries(sim.sold).sort((a, b) => b[1] - a[1])[0];
+  report = {day:S.day, dow:DAYS[(S.day - 1) % 7], weather:{...S.weather}, wlabel:wname(S.weather.id), earth:wgroup() === 'earth', place:L.name,
+    visitors:sim.arrived, served:sim.served, lost:{...sim.lost},
+    sales:sim.sales, tips:sim.tips, wages, rentBill, exInc:ex.inc, exUp:ex.up, exNotes:ex.notes, net, tossed, pastrySold:sim.pastrySold,
+    best: best ? DMAP[best[0]].name + ' (' + best[1] + ')' : '—', avgWait: sim.served ? sim.waitSum / sim.served / 60 : 0,
+    repFrom:oldRep, repTo:S.rep, stockOut:Object.keys(sim.stockOut), staff:S.staff, maxStaff:L.staff};
+  S.history.push({day:S.day, net, cash:S.cash});
+  S.day++; S.weather = S.forecast; S.forecast = rollWeather();
+  if (S.cash < 0) { S.over = true; S.overWhy = rentBill ? 'The rent check bounced and the landlord changed the locks.' : 'The shop ran out of money.'; }
+  save();
+  phase = 'report';
+  render();
+}
+
+function doMove() {
+  const from = LC(), to = LOC[S.tier + 1];
+  if (!to || S.cash < to.move) return;
+  S.cash -= to.move;
+  S.tier++;
+  const ratio = to.pm / from.pm, st = priceStep();
+  for (const k in S.prices) S.prices[k] = roundTo(S.prices[k] * ratio, st);
+  S.rentDue = S.day + 29;
+  if (S.tier === FINAL) S.won = true;
+  welcome = to.name; confirmMove = false; tab = 'menu';
+  save(); render(); scrollTo(0, 0);
+}
+
+/* ---------- run view + canvas ---------- */
+let cv, ctx, CW = 360, CH = 290, colors = {};
+function renderRun() {
+  $('#main').innerHTML = `
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <div class="runbar"><div class="runleft"><div class="clock" id="clock">7:00 AM</div><span class="rush" id="rush" hidden></span></div>
+        <div class="speeds" role="group" aria-label="Simulation speed">
+          ${[[1,'1×'],[2,'2×'],[4,'4×'],[40,'Skip']].map(([v, l]) => `<button data-act="speed" data-v="${v}" aria-pressed="${sim.speed === v}">${l}</button>`).join('')}
+        </div></div>
+      <div class="scene"><canvas id="cv" aria-label="Your ${LC().name.toLowerCase()}: customers line up while baristas make drinks"></canvas></div>
+      <div class="live">
+        <div class="stat"><div class="k">Served</div><div class="v" id="l-served">0</div></div>
+        <div class="stat"><div class="k">Walked out</div><div class="v" id="l-lost">0</div></div>
+        <div class="stat"><div class="k">Sales</div><div class="v" id="l-sales">$0</div></div>
+        <div class="stat"><div class="k">In line</div><div class="v" id="l-line">0</div></div>
+      </div>
+      <ul class="log" id="log"></ul>
+    </div>`;
+  cv = $('#cv'); ctx = cv.getContext('2d');
+  const cs = getComputedStyle(document.documentElement);
+  for (const k of ['ink','paper','mustard','tomato','leaf','leaf-ink','steel','board-green']) colors[k] = cs.getPropertyValue('--' + k).trim();
+  Object.assign(colors, LC().pal);
+  sizeCanvas();
+}
+function sizeCanvas() {
+  if (!cv) return;
+  const r = cv.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+  CW = r.width; CH = r.height;
+  cv.width = CW * dpr; cv.height = CH * dpr;
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+}
+addEventListener('resize', sizeCanvas);
+
+const outdoor = () => LC().scene === 'table' || LC().scene === 'truck';
+const geo = () => {
+  const x0 = Math.max(130, CW * 0.38), x1 = CW - 14;
+  return {x0, x1, wallH:100, shelfY:60, counterY:82, serveY:136, queueY:168, door: outdoor() ? {x:-24, y:150} : {x:31, y:112}};
+};
+function stationX(i) { const g = geo(); return g.x0 + 20 + i * Math.min(48, (g.x1 - g.x0 - 40) / Math.max(1, LC().staff - 1)); }
+function queueSlot(i) {
+  const g = geo(), sp = 24, startX = g.x0 - 22;
+  const per = Math.max(2, Math.floor((startX - 30) / sp) + 1);
+  const row = Math.floor(i / per), k = i % per;
+  const y = g.queueY + row * 30;
+  const x = row % 2 === 0 ? startX - k * sp : startX - (per - 1 - k) * sp;
+  return {x, y};
+}
+const SKINS = ['#f3cba3','#dca474','#a96a40','#7a4a2a','#f7dcc2','#c98c5d'];
+const GREENS = ['#7ccf5a','#5fb847','#9ad06a','#4fc4a0'];
+const BLOBS = ['#a77be0','#e07bc4','#7bb8e0','#f09a5a'];
+const HAIRS = ['#2a1b12','#5a3a22','#c9772f','#e8c45c','#8f8a85','#b4402e','#3a2a5a'];
+const SHIRTS = ['#e8513a','#3f7fd1','#8d5fd1','#f5b53a','#5fb847','#e26fa0','#39a39b','#ff8c42','#4b4f9a'];
+const pick = a => a[Math.floor(Math.random() * a.length)];
+const CROWDS = {
+  human:[['human',1]], orbital:[['astro',.6],['human',.4]], moon:[['astro',.7],['human',.3]],
+  mars:[['martian',.5],['astro',.3],['human',.2]], cosmic:[['martian',.3],['robot',.3],['blob',.25],['astro',.15]],
+  you:[['you',.6],['youMartian',.25],['youRobot',.15]],
+};
+function pickKind() { let r = Math.random(); for (const [k, p] of CROWDS[LC().crowd]) { if ((r -= p) <= 0) return k; } return 'human'; }
+function spawnPerson(c) {
+  const g = geo(), kind = pickKind();
+  const p = {x:g.door.x, y:g.door.y, state:'walk', c, cup:false, balkT:0, kind,
+    skin:pick(SKINS), hair:pick(HAIRS), shirt:pick(SHIRTS), style:Math.floor(Math.random() * 4), hat:pick(SHIRTS), seed:Math.random() * 10};
+  if (kind === 'martian') p.skin = pick(GREENS);
+  if (kind === 'blob') p.skin = pick(BLOBS);
+  if (kind.startsWith('you')) { p.skin = kind === 'youMartian' ? pick(GREENS) : SKINS[0]; p.hair = HAIRS[0]; p.style = Math.random() < .7 ? 0 : 1; p.kind = kind === 'youRobot' ? 'robot' : 'human'; p.you = true; }
+  sim.people.push(p);
+  return p;
+}
+function floatText(x, y, text, kind) { sim.floats.push({x, y, text, kind, life:1.4}); }
+
+function updateVisuals(dt) {
+  const g = geo(), fast = sim.speed >= 40;
+  const sp = 150 * Math.min(sim.speed, 4);
+  for (const p of sim.people) {
+    let tx, ty;
+    if (p.state === 'queue' || p.state === 'walk') {
+      const i = sim.queue.indexOf(p.c); const s = queueSlot(Math.max(0, i)); tx = s.x; ty = s.y;
+    } else if (p.state === 'serve') { tx = stationX(p.station); ty = g.serveY; }
+    else if (p.state === 'balk') {
+      tx = Math.min(p.x + 24, g.x0 - 40); ty = Math.max(p.y, g.door.y + 26);
+      p.balkT -= dt * Math.min(sim.speed, 4);
+      if (p.balkT <= 0) p.state = 'leave';
+    } else { tx = g.door.x; ty = g.door.y; }
+    const dx = tx - p.x, dy = ty - p.y, dist = Math.hypot(dx, dy);
+    p.moving = !fast && dist > 1;
+    if (fast || dist < sp * dt) { p.x = tx; p.y = ty; } else { p.x += dx / dist * sp * dt; p.y += dy / dist * sp * dt; }
+    if (p.state === 'leave' && Math.hypot(p.x - g.door.x, p.y - g.door.y) < 2) p.gone = true;
+  }
+  sim.people = sim.people.filter(p => !p.gone);
+  for (const f of sim.floats) { f.life -= dt; f.y -= 18 * dt; }
+  sim.floats = sim.floats.filter(f => f.life > 0);
+}
+
+/* drawing helpers: everything gets a fat ink outline */
+function rr(x, y, w, h, r) {
+  ctx.beginPath(); ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r);
+  ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath();
+}
+function paint(fill, lw = 2.5) { ctx.fillStyle = fill; ctx.fill(); ctx.lineWidth = lw; ctx.strokeStyle = colors.ink; ctx.stroke(); }
+function circ(x, y, r) { ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); }
+const hash = i => { const s = Math.sin(i * 12.9898) * 43758.5453; return s - Math.floor(s); };
+function stars(n, h, t, col = '#ffffff') {
+  for (let i = 0; i < n; i++) {
+    const x = hash(i) * CW, y = hash(i + 99) * h, tw = .5 + .5 * Math.sin(t * 2 + i);
+    ctx.globalAlpha = .4 + .6 * tw; ctx.fillStyle = col; ctx.fillRect(x, y, hash(i + 7) > .85 ? 2.5 : 1.5, hash(i + 7) > .85 ? 2.5 : 1.5);
+  }
+  ctx.globalAlpha = 1;
+}
+function earth(x, y, r, t) {
+  ctx.save(); circ(x, y, r); ctx.fillStyle = '#3f7fd1'; ctx.fill(); ctx.clip();
+  ctx.fillStyle = '#5fb847';
+  for (let i = 0; i < 4; i++) { const ox = ((i * 0.6 + t * 0.03) % 2.4 - 1.2) * r * 1.6; ctx.beginPath(); ctx.ellipse(x + ox, y + (i % 2 ? -r * .3 : r * .25), r * .45, r * .28, i, 0, Math.PI * 2); ctx.fill(); }
+  ctx.fillStyle = 'rgba(255,255,255,.75)'; ctx.beginPath(); ctx.ellipse(x - r * .2, y - r * .55, r * .5, r * .12, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.restore(); circ(x, y, r); ctx.lineWidth = 2.5; ctx.strokeStyle = colors.ink; ctx.stroke();
+}
+function tiles(y0, sz, c1, c2) {
+  for (let y = y0, r = 0; y < CH; y += sz, r++)
+    for (let x = 0, c = 0; x < CW; x += sz, c++) { ctx.fillStyle = (r + c) % 2 ? c1 : c2; ctx.fillRect(x, y, sz, sz); }
+}
+function bricks(y0, h, c1, c2) {
+  ctx.fillStyle = c1; ctx.fillRect(0, y0, CW, h);
+  ctx.strokeStyle = c2; ctx.lineWidth = 1.5;
+  for (let y = y0 + 10, r = 0; y < y0 + h; y += 10, r++) {
+    ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(CW, y); ctx.stroke();
+    for (let x = (r % 2) * 13; x < CW; x += 26) { ctx.beginPath(); ctx.moveTo(x, y - 10); ctx.lineTo(x, y); ctx.stroke(); }
+  }
+}
+function wallLine(g) { ctx.strokeStyle = colors.ink; ctx.lineWidth = 2.5; ctx.beginPath(); ctx.moveTo(0, g.wallH); ctx.lineTo(CW, g.wallH); ctx.stroke(); }
+
+function door(g, kind) {
+  const P = colors;
+  if (kind === 'airlock') {
+    rr(8, 22, 46, g.wallH - 21, 10); paint('#c9cfd6');
+    ctx.save(); rr(8, 22, 46, g.wallH - 21, 10); ctx.clip();
+    for (let i = -6; i < 12; i++) { ctx.fillStyle = i % 2 ? '#f5b53a' : '#2a1b12'; ctx.beginPath(); ctx.moveTo(8 + i * 8, 22); ctx.lineTo(16 + i * 8, 22); ctx.lineTo(16 + i * 8 - 8, 30); ctx.lineTo(8 + i * 8 - 8, 30); ctx.fill(); }
+    ctx.restore();
+    rr(15, 34, 32, g.wallH - 40, 8); paint('#e7ebf0', 2);
+    circ(31, 54, 7); paint(P.sky, 2);
+  } else {
+    rr(10, 26, 42, g.wallH - 25, 4); paint(kind === 'dark' ? '#3a2a20' : P['wood-2'] === '#8a4f25' ? P.wood : '#8a5a36');
+    rr(17, 33, 28, 22, 3); paint('#bfe6ee', 2);
+    circ(45, 74, 2.5); paint(P.mustard, 1.5);
+  }
+  ctx.save(); ctx.translate(31, 64); ctx.rotate(-.08);
+  rr(-15, -7, 30, 14, 3); paint(P.tomato, 2);
+  ctx.fillStyle = P.paper; ctx.font = '600 10px Fredoka, sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText(sim.closed ? 'SHUT' : 'OPEN', 0, 1); ctx.restore(); ctx.textAlign = 'left';
+}
+function menuBoard(g) {
+  const P = colors, mbx = 62, mbw = g.x0 - 76;
+  if (mbw <= 50) return;
+  ctx.save(); ctx.translate(mbx + mbw / 2, 34); ctx.rotate(.025);
+  rr(-mbw / 2, -24, mbw, 46, 4); paint(P['board-green'], 3);
+  ctx.fillStyle = P.paper; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.font = '13px "Luckiest Guy", Impact, sans-serif'; ctx.fillText('MENU', 0, -12);
+  ctx.font = '13px "Patrick Hand", cursive';
+  ctx.fillText('latte ' + money(S.prices.latte), 0, 3); ctx.fillText('drip ' + money(S.prices.drip), 0, 15);
+  ctx.restore(); ctx.textAlign = 'left';
+}
+function aFrame(x, y) {
+  const P = colors;
+  ctx.beginPath(); ctx.moveTo(x - 16, y); ctx.lineTo(x - 11, y - 38); ctx.lineTo(x + 11, y - 38); ctx.lineTo(x + 16, y); ctx.closePath(); paint(P['board-green'], 2.5);
+  ctx.fillStyle = P.paper; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.font = '9px "Luckiest Guy", Impact, sans-serif'; ctx.fillText('COFFEE', x, y - 28);
+  ctx.font = '11px "Patrick Hand", cursive'; ctx.fillText(money(S.prices.drip), x, y - 15);
+  ctx.textAlign = 'left';
+}
+function machine(x, y) {
+  const P = colors;
+  rr(x - 17, y - 26, 34, 26, 4); paint(P.steel);
+  rr(x - 13, y - 31, 26, 6, 2); paint(P.steel, 2);
+  rr(x - 12, y - 9, 8, 5, 1); paint(P.ink, 1); rr(x + 4, y - 9, 8, 5, 1); paint(P.ink, 1);
+  circ(x, y - 19, 3); paint(P.tomato, 1.5);
+}
+function shelfStuff(g, inner) {
+  const P = colors;
+  rr(g.x0 - 6 + inner, g.shelfY, g.x1 - g.x0 + 12 - inner * 2, 8, 2); paint(P.wood);
+  machine(g.x1 - 24 - inner, g.shelfY);
+  if (S.up.machine2) machine(g.x1 - 64 - inner, g.shelfY);
+  for (let i = 0; i < 3; i++) { rr(g.x0 + 2 + inner + i * 15, g.shelfY - 17 + (i % 2) * 2, 13, 17 - (i % 2) * 2, 3); paint(P['wood-2'] === '#4a3222' ? '#8a4f25' : '#8a4f25', 2); }
+  if (S.up.grinder) { const gx = g.x0 + 56 + inner; rr(gx - 6, g.shelfY - 14, 12, 14, 2); paint(P.ink, 1.5); ctx.beginPath(); ctx.moveTo(gx - 9, g.shelfY - 26); ctx.lineTo(gx + 9, g.shelfY - 26); ctx.lineTo(gx + 4, g.shelfY - 14); ctx.lineTo(gx - 4, g.shelfY - 14); ctx.closePath(); paint('#bfe6ee', 2); }
+}
+
+/* one backdrop per location */
+function backdrop(g, t) {
+  const P = colors, k = LC().scene;
+  if (k === 'table') {
+    bricks(0, g.wallH, '#c96a4a', '#a8543a');
+    rr(70, 14, 40, 34, 3); paint('#bfe6ee'); ctx.beginPath(); ctx.moveTo(90, 14); ctx.lineTo(90, 48); ctx.stroke();
+    rr(66, 46, 48, 6, 2); paint('#8a5a36', 2);
+    for (let i = 0; i < 3; i++) { circ(76 + i * 14, 42, 6); paint('#5fb847', 2); }
+    rr(g.x0 + 10, 10, 42, g.wallH - 9, 3); paint('#3f7fd1');
+    ctx.fillStyle = P.paper; ctx.font = '600 10px Fredoka, sans-serif'; ctx.textAlign = 'center'; ctx.fillText('APT 2B', g.x0 + 31, 26); ctx.textAlign = 'left';
+    tiles(g.wallH, 44, P.floor, P['floor-2']);
+    ctx.fillStyle = '#8f8a85'; ctx.fillRect(0, CH - 12, CW, 12); ctx.strokeStyle = P.ink; ctx.lineWidth = 2.5; ctx.beginPath(); ctx.moveTo(0, CH - 12); ctx.lineTo(CW, CH - 12); ctx.stroke();
+    wallLine(g);
+    aFrame(70, 150);
+  } else if (k === 'truck') {
+    const grd = ctx.createLinearGradient(0, 0, 0, g.wallH); grd.addColorStop(0, '#9fd8ec'); grd.addColorStop(1, '#d9f1f6');
+    ctx.fillStyle = grd; ctx.fillRect(0, 0, CW, g.wallH);
+    circ(40, 24, 12); paint('#f5d76e', 2);
+    for (let i = 0; i < 9; i++) { const bw = 30 + hash(i) * 30, bh = 30 + hash(i + 3) * 45, bx = i * (CW / 8) - 10; rr(bx, g.wallH - bh, bw, bh + 4, 2); paint(i % 2 ? '#9fb9c2' : '#b6ccd3', 2);
+      ctx.fillStyle = '#e7f3f6'; for (let wy = g.wallH - bh + 6; wy < g.wallH - 8; wy += 11) for (let wx = bx + 5; wx < bx + bw - 6; wx += 9) ctx.fillRect(wx, wy, 4, 5); }
+    ctx.fillStyle = '#b8b3a8'; ctx.fillRect(0, g.wallH, CW, 26);
+    tiles(g.wallH + 26, 400, P.floor, P.floor);
+    ctx.fillStyle = '#f5d76e'; for (let x = 10; x < CW; x += 60) ctx.fillRect(x, CH - 30, 30, 5);
+    ctx.strokeStyle = P.ink; ctx.lineWidth = 2.5; ctx.beginPath(); ctx.moveTo(0, g.wallH + 26); ctx.lineTo(CW, g.wallH + 26); ctx.stroke();
+    wallLine(g);
+    // the truck itself
+    rr(g.x0 - 26, 6, CW - g.x0 + 40, g.counterY + 46, 12); paint(P.wood, 3);
+    rr(g.x0 - 6, 24, g.x1 - g.x0 - 6, g.counterY - 22, 4); paint('#5b4636', 2.5);
+    for (let x = g.x0 - 12, i = 0; x < g.x1 - 4; x += 16, i++) { ctx.beginPath(); ctx.moveTo(x, 12); ctx.lineTo(x + 16, 12); ctx.lineTo(x + 16, 24); ctx.quadraticCurveTo(x + 8, 30, x, 24); ctx.closePath(); paint(i % 2 ? '#fff3d6' : P.mustard, 2); }
+    for (const wx of [g.x0 + 12, g.x1 - 30]) { circ(wx, g.counterY + 50, 13); paint(P.ink, 2); circ(wx, g.counterY + 50, 5); paint(P.steel, 2); }
+    aFrame(80, 150);
+  } else if (k === 'small') {
+    ctx.fillStyle = '#39a39b'; ctx.fillRect(0, 0, CW, g.wallH);
+    ctx.fillStyle = '#2f8c85'; for (let x = 0; x < CW; x += 30) ctx.fillRect(x + 25, 0, 5, g.wallH);
+    tiles(g.wallH, 26, P.floor, P['floor-2']);
+    ctx.fillStyle = P['wood-2']; ctx.fillRect(0, g.wallH - 7, CW, 7);
+    wallLine(g);
+    const ww = Math.min(80, (g.x1 - g.x0) * .35), wx = g.x0 + (g.x1 - g.x0) * .38;
+    rr(wx, 6, ww, 24, 3); paint('#bfe6ee'); ctx.beginPath(); ctx.moveTo(wx + ww / 2, 6); ctx.lineTo(wx + ww / 2, 30); ctx.stroke();
+    door(g, 'wood'); menuBoard(g);
+  } else if (k === 'downtown') {
+    bricks(0, g.wallH, '#a8483a', '#8a3a2e');
+    for (let y = g.wallH, r = 0; y < CH; y += 18, r++) { ctx.fillStyle = r % 2 ? P.floor : P['floor-2']; ctx.fillRect(0, y, CW, 18);
+      ctx.strokeStyle = 'rgba(42,27,18,.3)'; ctx.lineWidth = 1.5; for (let x = (r * 37) % 90; x < CW; x += 90) { ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x, y + 18); ctx.stroke(); } }
+    wallLine(g);
+    const wx = g.x0 + (g.x1 - g.x0) * .3, ww = Math.min(110, (g.x1 - g.x0) * .45);
+    ctx.save(); ctx.beginPath(); ctx.moveTo(wx, 34); ctx.arc(wx + ww / 2, 34, ww / 2, Math.PI, 0); ctx.lineTo(wx + ww, 34); ctx.closePath(); ctx.fillStyle = '#ffd59a'; ctx.fill(); ctx.clip();
+    for (let i = 0; i < 6; i++) { ctx.fillStyle = '#c98f5a'; ctx.fillRect(wx + i * ww / 6, 20 - hash(i + 2) * 18, ww / 6 - 2, 40); }
+    ctx.restore(); ctx.beginPath(); ctx.moveTo(wx, 34); ctx.arc(wx + ww / 2, 34, ww / 2, Math.PI, 0); ctx.lineWidth = 3; ctx.strokeStyle = P.ink; ctx.stroke();
+    for (const lx of [g.x0 + 10, g.x1 - 10]) { ctx.strokeStyle = P.ink; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(lx, 0); ctx.lineTo(lx, 14); ctx.stroke(); ctx.beginPath(); ctx.moveTo(lx - 9, 22); ctx.lineTo(lx - 4, 14); ctx.lineTo(lx + 4, 14); ctx.lineTo(lx + 9, 22); ctx.closePath(); paint(P.mustard, 2);
+      ctx.fillStyle = 'rgba(245,215,110,.25)'; ctx.beginPath(); ctx.moveTo(lx - 9, 22); ctx.lineTo(lx - 22, 56); ctx.lineTo(lx + 22, 56); ctx.lineTo(lx + 9, 22); ctx.fill(); }
+    door(g, 'dark'); menuBoard(g);
+    for (const px of [66, g.x0 - 22]) { rr(px - 9, g.wallH + 6, 18, 18, 3); paint('#c27c43', 2); for (let i = -1; i <= 1; i++) { ctx.beginPath(); ctx.ellipse(px + i * 7, g.wallH - 4 - Math.abs(i) * -3, 5, 11, i * .5, 0, Math.PI * 2); paint('#5fb847', 2); } }
+  } else if (k === 'orbital') {
+    ctx.fillStyle = '#d9dee6'; ctx.fillRect(0, 0, CW, g.wallH);
+    ctx.strokeStyle = '#b8c0cc'; ctx.lineWidth = 2; for (let x = 0; x < CW; x += 48) { ctx.strokeRect(x + 2, 3, 44, g.wallH - 6); }
+    ctx.fillStyle = '#9aa3ad'; for (let x = 0; x < CW; x += 48) for (const y of [8, g.wallH - 8]) { circ(x + 8, y, 1.8); ctx.fill(); circ(x + 40, y, 1.8); ctx.fill(); }
+    tiles(g.wallH, 26, P.floor, P['floor-2']);
+    ctx.strokeStyle = 'rgba(42,27,18,.25)'; ctx.lineWidth = 1; for (let x = -CH; x < CW; x += 9) { ctx.beginPath(); ctx.moveTo(x, CH); ctx.lineTo(x + CH - g.wallH, g.wallH); ctx.stroke(); }
+    wallLine(g);
+    const px = g.x0 + (g.x1 - g.x0) * .42, r = 26;
+    ctx.save(); circ(px, 32, r); ctx.fillStyle = '#0b0e1a'; ctx.fill(); ctx.clip();
+    for (let i = 0; i < 18; i++) { ctx.fillStyle = '#fff'; ctx.fillRect(px - r + hash(i) * r * 2, 32 - r + hash(i + 40) * r * 2, 1.5, 1.5); }
+    earth(px + 10, 50, 22, t); ctx.restore();
+    circ(px, 32, r); ctx.lineWidth = 5; ctx.strokeStyle = '#9aa3ad'; ctx.stroke(); ctx.lineWidth = 2.5; ctx.strokeStyle = P.ink; circ(px, 32, r + 3); ctx.stroke();
+    door(g, 'airlock'); menuBoard(g);
+  } else if (k === 'moon') {
+    ctx.fillStyle = '#0b0e1a'; ctx.fillRect(0, 0, CW, g.wallH);
+    stars(40, g.wallH - 20, t);
+    earth(CW * .62, 24, 13, t);
+    ctx.beginPath(); ctx.moveTo(0, 80); for (let x = 0; x <= CW; x += 20) ctx.lineTo(x, 74 + Math.sin(x * .05) * 6 + hash(x) * 4); ctx.lineTo(CW, g.wallH); ctx.lineTo(0, g.wallH); ctx.closePath(); paint('#9aa0a8', 2);
+    for (let i = 0; i < 6; i++) { ctx.beginPath(); ctx.ellipse(hash(i + 5) * CW, 86 + hash(i) * 8, 9, 3, 0, 0, Math.PI * 2); paint('#7d838c', 1.5); }
+    ctx.strokeStyle = 'rgba(203,213,216,.5)'; ctx.lineWidth = 2;
+    for (let i = 1; i < 5; i++) { ctx.beginPath(); ctx.ellipse(CW / 2, g.wallH + 40, CW * .7, g.wallH + 40 - i * 6, 0, Math.PI, 0); ctx.stroke(); }
+    for (let x = 0; x < CW; x += CW / 6) { ctx.beginPath(); ctx.moveTo(x, g.wallH); ctx.quadraticCurveTo(CW / 2, -30, CW / 2, -30); ctx.stroke(); }
+    tiles(g.wallH, 30, P.floor, P['floor-2']);
+    wallLine(g);
+    door(g, 'airlock'); menuBoard(g);
+  } else if (k === 'mars') {
+    const storm = S.weather.id === 'rain';
+    const grd = ctx.createLinearGradient(0, 0, 0, g.wallH); grd.addColorStop(0, storm ? '#c97a4a' : '#e9a07a'); grd.addColorStop(1, '#f3c49a');
+    ctx.fillStyle = grd; ctx.fillRect(0, 0, CW, g.wallH);
+    circ(CW * .7, 20, 7); ctx.fillStyle = 'rgba(255,248,230,.8)'; ctx.fill();
+    ctx.beginPath(); ctx.moveTo(0, 70); for (let x = 0; x <= CW; x += 30) ctx.quadraticCurveTo(x + 15, 50 + hash(x) * 20, x + 30, 70); ctx.lineTo(CW, g.wallH); ctx.lineTo(0, g.wallH); ctx.closePath(); paint('#c4612f', 2);
+    ctx.beginPath(); ctx.moveTo(0, 86); for (let x = 0; x <= CW; x += 40) ctx.quadraticCurveTo(x + 20, 72 + hash(x + 1) * 10, x + 40, 86); ctx.lineTo(CW, g.wallH); ctx.lineTo(0, g.wallH); ctx.closePath(); paint('#a94f25', 2);
+    const rx = ((t * 8) % (CW + 60)) - 30; rr(rx - 10, 74, 20, 8, 2); paint('#e7ebf0', 1.5); circ(rx - 6, 84, 3); paint(P.ink, 1); circ(rx + 6, 84, 3); paint(P.ink, 1);
+    if (storm) { ctx.fillStyle = 'rgba(169,79,37,.5)'; for (let i = 0; i < 60; i++) { const x = (hash(i) * CW + t * 120 * (0.5 + hash(i + 3))) % CW; ctx.fillRect(x, hash(i + 9) * g.wallH, 6, 1.5); } }
+    ctx.strokeStyle = P.ink; ctx.lineWidth = 4; for (let x = CW / 5; x < CW; x += CW / 5) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, g.wallH); ctx.stroke(); }
+    tiles(g.wallH, 26, P.floor, P['floor-2']);
+    wallLine(g);
+    door(g, 'airlock'); menuBoard(g);
+  } else if (k === 'blackhole') {
+    ctx.fillStyle = '#0a0612'; ctx.fillRect(0, 0, CW, g.wallH);
+    stars(50, g.wallH, t, '#d9c8ff');
+    const cx = g.x0 + (g.x1 - g.x0) * .45, cy = 34;
+    for (let i = 5; i >= 0; i--) { ctx.beginPath(); ctx.ellipse(cx, cy, 30 + i * 9, 6 + i * 2, -.12, 0, Math.PI * 2); ctx.strokeStyle = ['#fff3c4','#ffd36e','#ff9f43','#ff6b3d','#c43d6b','#6b2a8a'][i]; ctx.lineWidth = 4; ctx.setLineDash([14, 6]); ctx.lineDashOffset = -t * (30 - i * 4); ctx.stroke(); }
+    ctx.setLineDash([]);
+    ctx.beginPath(); ctx.arc(cx, cy, 30, Math.PI * 1.05, Math.PI * 1.95); ctx.strokeStyle = '#ffd36e'; ctx.lineWidth = 3; ctx.stroke();
+    circ(cx, cy, 17); ctx.fillStyle = '#000'; ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = '#ff9f43'; ctx.stroke();
+    for (let y = g.wallH, r = 0; y < CH; y += 22, r++) { ctx.fillStyle = r % 2 ? P.floor : P['floor-2']; ctx.fillRect(0, y, CW, 22); }
+    ctx.strokeStyle = 'rgba(167,123,224,.5)'; ctx.lineWidth = 1.5;
+    for (let x = -40; x < CW + 40; x += 28) { ctx.beginPath(); ctx.moveTo(x, g.wallH); for (let y = g.wallH; y <= CH; y += 10) ctx.lineTo(x + Math.sin(y * .05 + t + x * .01) * 6 + (x - cx) * (y - g.wallH) / 400, y); ctx.stroke(); }
+    wallLine(g);
+    door(g, 'airlock'); menuBoard(g);
+  } else {
+    const grd = ctx.createLinearGradient(0, 0, CW, g.wallH); grd.addColorStop(0, '#ff5fa2'); grd.addColorStop(.5, '#b98cff'); grd.addColorStop(1, '#5fd3ff');
+    ctx.fillStyle = grd; ctx.fillRect(0, 0, CW, g.wallH);
+    for (let i = 0; i < 4; i++) {
+      const px = 80 + i * (CW - 120) / 3, py = 30 + (i % 2) * 22;
+      for (let j = 4; j >= 0; j--) { ctx.beginPath(); ctx.ellipse(px, py, 8 + j * 4, 13 + j * 5, Math.sin(t + i) * .3, 0, Math.PI * 2); ctx.fillStyle = `hsl(${(t * 60 + i * 80 + j * 40) % 360} 90% ${55 + j * 6}%)`; ctx.fill(); }
+      ctx.beginPath(); ctx.ellipse(px, py, 24, 33, Math.sin(t + i) * .3, 0, Math.PI * 2); ctx.lineWidth = 2.5; ctx.strokeStyle = colors.ink; ctx.stroke();
+    }
+    tiles(g.wallH, 26, P.floor, P['floor-2']);
+    wallLine(g);
+    door(g, 'wood'); menuBoard(g);
+  }
+}
+
+function figure(x, y, o, t) {
+  const P = colors;
+  let bob = o.moving ? Math.abs(Math.sin(t * 14 + (o.seed || 0))) * 2.5 : 0;
+  if (LC().zeroG && !o.apron) bob += 3 + Math.sin(t * 2 + (o.seed || 0)) * 3;
+  ctx.fillStyle = 'rgba(42,27,18,.2)'; ctx.beginPath(); ctx.ellipse(x, y + 1, 12, 3.5, 0, 0, Math.PI * 2); ctx.fill();
+  y -= bob;
+  const k = o.kind || 'human';
+  if (k === 'blob') {
+    ctx.beginPath(); ctx.moveTo(x - 14, y); ctx.quadraticCurveTo(x - 17, y - 36, x, y - 40); ctx.quadraticCurveTo(x + 17, y - 36, x + 14, y); ctx.quadraticCurveTo(x, y + 3, x - 14, y); paint(o.skin);
+    circ(x, y - 26, 6); paint('#fff', 2); circ(x + 1, y - 25, 2.5); ctx.fillStyle = P.ink; ctx.fill();
+    if (o.cup) { rr(x + 10, y - 22, 9, 12, 2); paint('#ffffff', 2); }
+    if (o.mood === 'mad') { ctx.strokeStyle = P.ink; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(x - 6, y - 35); ctx.lineTo(x + 6, y - 32); ctx.stroke(); }
+    if (o.mood === 'happy') { ctx.strokeStyle = P.ink; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(x, y - 15, 4, .15 * Math.PI, .85 * Math.PI); ctx.stroke(); }
+    return;
+  }
+  rr(x - 7, y - 11, 6, 11, 2); paint(P.ink, 1); rr(x + 1, y - 11, 6, 11, 2); paint(P.ink, 1);
+  rr(x - 11, y - 30, 22, 22, 7); paint(k === 'astro' ? '#f3f0e6' : k === 'robot' ? '#b8c0cc' : o.shirt);
+  if (k === 'astro') { rr(x - 5, y - 25, 10, 7, 2); paint(o.shirt, 1.5); }
+  if (o.apron) { rr(x - 7, y - 25, 14, 17, 3); paint(P.mustard, 2); }
+  if (o.cup) { rr(x + 9, y - 27, 9, 12, 2); paint('#ffffff', 2); ctx.fillStyle = '#8a4f25'; ctx.fillRect(x + 10, y - 23, 7, 4); }
+  const hy = y - 41;
+  if (k === 'robot') {
+    rr(x - 11, hy - 11, 22, 21, 4); paint(o.you ? '#d9c2a5' : '#cbd5d8');
+    ctx.strokeStyle = P.ink; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(x, hy - 11); ctx.lineTo(x, hy - 18); ctx.stroke(); circ(x, hy - 19, 2.5); paint(P.tomato, 1.5);
+    rr(x - 7, hy - 4, 5, 4, 1); paint(o.mood === 'mad' ? P.tomato : '#7fe0ff', 1.5); rr(x + 2, hy - 4, 5, 4, 1); paint(o.mood === 'mad' ? P.tomato : '#7fe0ff', 1.5);
+    ctx.beginPath(); ctx.moveTo(x - 5, hy + 5); ctx.lineTo(x + 5, hy + 5); ctx.stroke();
+    if (o.you) { ctx.beginPath(); ctx.arc(x, hy - 11, 11, Math.PI * 1.05, Math.PI * 1.95); ctx.closePath(); paint(o.hair, 2); }
+    return;
+  }
+  circ(x, hy, 11.5); paint(o.skin);
+  if (k === 'martian') {
+    ctx.strokeStyle = P.ink; ctx.lineWidth = 2;
+    for (const s of [-1, 1]) { ctx.beginPath(); ctx.moveTo(x + s * 4, hy - 10); ctx.lineTo(x + s * 8, hy - 20); ctx.stroke(); circ(x + s * 8, hy - 21, 3); paint(o.skin, 1.5); }
+  } else {
+    ctx.fillStyle = o.hair;
+    if (o.style === 0) { ctx.beginPath(); ctx.arc(x, hy, 11.5, Math.PI * 1.02, Math.PI * 1.98); ctx.quadraticCurveTo(x, hy - 3, x - 11.4, hy - 1); ctx.closePath(); paint(o.hair, 2); }
+    else if (o.style === 1) { rr(x - 12, hy - 15, 24, 9, 4.5); paint(o.hat, 2); circ(x, hy - 16, 3); paint(o.hat, 2); }
+    else if (o.style === 2) { ctx.beginPath(); ctx.arc(x, hy, 11.5, Math.PI * 1.05, Math.PI * 1.95); ctx.closePath(); paint(o.hair, 2); circ(x, hy - 14, 5); paint(o.hair, 2); }
+    else { ctx.beginPath(); ctx.arc(x, hy, 12, Math.PI * .95, Math.PI * 2.05); ctx.lineTo(x + 12, hy + 5); ctx.lineTo(x + 8, hy - 3); ctx.lineTo(x - 8, hy - 3); ctx.lineTo(x - 12, hy + 5); ctx.closePath(); paint(o.hair, 2); }
+  }
+  ctx.fillStyle = P.ink; ctx.strokeStyle = P.ink; ctx.lineWidth = 2;
+  if (k === 'martian') { for (const ex of [-5, 0, 5]) { circ(x + ex, hy + (ex ? 1 : -3), 1.8); ctx.fill(); } }
+  else { circ(x - 4, hy + 1, 1.7); ctx.fill(); circ(x + 4, hy + 1, 1.7); ctx.fill(); }
+  ctx.beginPath();
+  if (o.mood === 'happy') ctx.arc(x, hy + 4, 4, .15 * Math.PI, .85 * Math.PI);
+  else if (o.mood === 'mad') {
+    ctx.arc(x, hy + 9, 4, 1.2 * Math.PI, 1.8 * Math.PI);
+    ctx.moveTo(x - 7, hy - 4); ctx.lineTo(x - 2, hy - 2); ctx.moveTo(x + 7, hy - 4); ctx.lineTo(x + 2, hy - 2);
+  } else if (o.mood === 'worried') { ctx.moveTo(x - 3, hy + 6); ctx.lineTo(x + 3, hy + 6); }
+  else if (o.mood === 'focus') { ctx.moveTo(x - 2, hy + 6); ctx.lineTo(x + 2, hy + 6); }
+  else { ctx.moveTo(x - 3, hy + 6); ctx.quadraticCurveTo(x, hy + 7, x + 3, hy + 6); }
+  ctx.stroke();
+  if (o.mood === 'mad') { ctx.fillStyle = 'rgba(232,81,58,.35)'; circ(x - 7, hy + 4, 2.5); ctx.fill(); circ(x + 7, hy + 4, 2.5); ctx.fill(); }
+  if (o.mood === 'worried') { ctx.beginPath(); ctx.moveTo(x + 12, hy - 8); ctx.quadraticCurveTo(x + 16, hy - 2, x + 12, hy - 1); ctx.quadraticCurveTo(x + 9, hy - 3, x + 12, hy - 8); paint('#7fd0ef', 1.5); }
+  if (k === 'astro') {
+    circ(x, hy, 16); ctx.fillStyle = 'rgba(191,230,238,.3)'; ctx.fill(); ctx.lineWidth = 2.5; ctx.strokeStyle = P.ink; ctx.stroke();
+    ctx.beginPath(); ctx.arc(x, hy, 12.5, Math.PI * 1.15, Math.PI * 1.45); ctx.strokeStyle = 'rgba(255,255,255,.9)'; ctx.lineWidth = 2.5; ctx.stroke();
+  }
+}
+
+function bubble(x, y, text, kind) {
+  ctx.font = '17px "Patrick Hand", "Comic Sans MS", cursive';
+  const w = ctx.measureText(text).width + 14, h = 22;
+  x = clamp(x, w / 2 + 4, CW - w / 2 - 4);
+  rr(x - w / 2, y - h, w, h, 9); paint('#ffffff', 2.5);
+  ctx.beginPath(); ctx.moveTo(x - 5, y - 1.5); ctx.lineTo(x, y + 6); ctx.lineTo(x + 5, y - 1.5);
+  ctx.fillStyle = '#ffffff'; ctx.fill(); ctx.lineWidth = 2.5; ctx.strokeStyle = colors.ink;
+  ctx.beginPath(); ctx.moveTo(x - 5, y); ctx.lineTo(x, y + 6); ctx.lineTo(x + 5, y); ctx.stroke();
+  ctx.fillStyle = kind === 'good' ? colors['leaf-ink'] : colors.tomato;
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText(text, x, y - h / 2 + 1);
+  ctx.textAlign = 'left';
+}
+
+function draw() {
+  const g = geo(), P = colors, t = performance.now() / 1000, L = LC();
+  ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+  ctx.clearRect(0, 0, CW, CH);
+  backdrop(g, t);
+  if (L.scene === 'truck') shelfStuff(g, 6);
+  else if (L.scene !== 'table') shelfStuff(g, 0);
+  sim.baristas.forEach((b, i) => {
+    const x = stationX(i);
+    figure(x, g.counterY + 12, {skin:SKINS[(i * 2) % SKINS.length], hair:HAIRS[i % HAIRS.length], shirt:i ? P.leaf : P.tomato, style:[0, 2, 3, 1, 2, 3][i], hat:P.tomato, apron:true, mood:b.cust ? 'focus' : 'happy'}, t);
+    if (b.cust) {
+      const pr = clamp((sim.t - b.start) / Math.max(1, b.busy - b.start), 0, 1);
+      const px = x + 15, py = g.counterY - 48;
+      circ(px, py, 7); paint('#ffffff', 2);
+      ctx.beginPath(); ctx.moveTo(px, py); ctx.arc(px, py, 5, -Math.PI / 2, -Math.PI / 2 + pr * Math.PI * 2); ctx.closePath(); ctx.fillStyle = P.leaf; ctx.fill();
+    }
+  });
+  if (L.scene === 'table') {
+    ctx.strokeStyle = P.ink; ctx.lineWidth = 2.5;
+    ctx.beginPath(); ctx.moveTo(g.x1 - 30, g.counterY + 2); ctx.lineTo(g.x1 - 30, 8); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(g.x1 - 80, 26); ctx.quadraticCurveTo(g.x1 - 30, -6, g.x1 + 20, 26); ctx.closePath(); paint(P.tomato, 2.5);
+    for (const lx of [g.x0, g.x1 - 8]) { ctx.beginPath(); ctx.moveTo(lx, g.counterY + 6); ctx.lineTo(lx + 8, g.counterY + 40); ctx.moveTo(lx + 8, g.counterY + 6); ctx.lineTo(lx, g.counterY + 40); ctx.stroke(); }
+    rr(g.x0 - 8, g.counterY, g.x1 - g.x0 + 16, 10, 2); paint('#f3f0e6');
+    ctx.fillStyle = P.tomato; for (let x = g.x0 - 4; x < g.x1 + 4; x += 12) ctx.fillRect(x, g.counterY + 2, 6, 6);
+    rr(g.x1 - 30, g.counterY - 22, 16, 22, 3); paint(P.steel, 2); rr(g.x1 - 50, g.counterY - 14, 12, 14, 2); paint(P.ink, 1.5);
+  } else if (L.scene === 'truck') {
+    rr(g.x0 - 10, g.counterY - 2, g.x1 - g.x0 + 6, 9, 3); paint(P.steel);
+    rr(g.x0 - 4, g.counterY - 15, 18, 13, 3); paint(P.mustard, 2);
+  } else {
+    rr(g.x0 - 8, g.counterY + 4, g.x1 - g.x0 + 16, 30, 3); paint(P['wood-2']);
+    ctx.strokeStyle = 'rgba(42,27,18,.35)'; ctx.lineWidth = 2;
+    for (let x = g.x0 + 18; x < g.x1; x += 26) { ctx.beginPath(); ctx.moveTo(x, g.counterY + 8); ctx.lineTo(x, g.counterY + 32); ctx.stroke(); }
+    rr(g.x0 - 12, g.counterY - 3, g.x1 - g.x0 + 24, 9, 3); paint(P.wood);
+    rr(g.x0 - 6, g.counterY - 16, 20, 14, 3); paint(P.tomato, 2); rr(g.x0 - 3, g.counterY - 13, 14, 5, 1); paint('#bfe6ee', 1.5);
+    if (S.up.seating) {
+      for (let i = 0; i < 2; i++) {
+        const tx = g.x1 - 30 - i * 74, ty = CH - 26;
+        if (tx < g.x0 + 10) break;
+        rr(tx - 3, ty - 20, 6, 20, 2); paint(P['wood-2'], 2);
+        ctx.beginPath(); ctx.ellipse(tx, ty - 22, 20, 6, 0, 0, Math.PI * 2); paint(P.wood);
+        for (const a of [-1, 1]) { rr(tx + a * 28 - 6, ty - 18, 12, 18, 3); paint(P.tomato, 2); }
+      }
+    }
+  }
+  const people = sim.people.slice().sort((a, b) => a.y - b.y);
+  for (const p of people) {
+    let mood = 'meh';
+    if (p.state === 'balk' || (p.state === 'leave' && !p.cup)) mood = 'mad';
+    else if (p.cup) mood = p.happy > 0.25 ? 'happy' : 'meh';
+    else if (p.state === 'queue' && p.c.deadline - sim.t < 150) mood = 'worried';
+    figure(p.x, p.y, {kind:p.kind, you:p.you, skin:p.skin, hair:p.hair, shirt:p.shirt, style:p.style, hat:p.hat, cup:p.cup, mood, moving:p.moving, seed:p.seed}, t);
+  }
+  for (const f of sim.floats) { ctx.globalAlpha = clamp(f.life * 1.5, 0, 1); bubble(f.x, f.y - 40, f.text, f.kind); }
+  ctx.globalAlpha = 1;
+}
+
+
+let last = 0, uiTick = 0;
+function frame(ts) {
+  const dt = Math.min(0.05, (ts - last) / 1000 || 0); last = ts;
+  if (phase === 'run' && sim && cv) {
+    if (!sim.done) {
+      const gdt = dt * GS * sim.speed, n = Math.max(1, Math.ceil(gdt / 20));
+      for (let i = 0; i < n && !sim.done; i++) step(gdt / n);
+    }
+    updateVisuals(dt);
+    draw();
+    uiTick += dt;
+    if (uiTick > 0.1) {
+      uiTick = 0;
+      $('#clock').textContent = fmtTime(Math.min(sim.t, CLOSE + 3599));
+      const r = sim.closed ? '' : rushLabel(sim.t), re = $('#rush');
+      re.hidden = !r; re.textContent = r;
+      $('#l-served').textContent = sim.served;
+      $('#l-lost').textContent = sim.lost.price + sim.lost.line + sim.lost.wait + sim.lost.stock;
+      $('#l-sales').textContent = money0(sim.sales + sim.tips);
+      $('#l-line').textContent = sim.queue.length;
+    }
+  }
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+
+/* ---------- report ---------- */
+function renderReport() {
+  const r = report, L = r.lost, lostAll = L.price + L.line + L.wait + L.stock, nx = LOC[S.tier + 1], cur = LC();
+  const tips = [];
+  if (L.line + L.wait > Math.max(4, r.visitors * 0.08)) tips.push(`The line cost you ${L.line + L.wait} customers. ${r.staff < r.maxStaff ? 'Another barista' : 'Seating, music or a bigger place'} would help the rushes.`);
+  if (L.price > Math.max(4, r.visitors * 0.15)) tips.push(`${L.price} people looked at the prices and left. Try lowering your busiest drinks.`);
+  if (L.price === 0 && r.served > 30) tips.push('Nobody balked at your prices. You can probably charge more.');
+  if (r.stockOut.length) tips.push('You ran out of ' + r.stockOut.map(s => s === 'pastry' ? 'croissants' : s).join(' and ') + '. Check Supplies before opening.');
+  if (r.tossed >= 5) tips.push(`${r.tossed} croissants went in the trash. Buy fewer trays.`);
+  if (cur.rent && rentIn() <= 5 && S.cash < cur.rent) tips.push(`Rent of ${money0(cur.rent)} is due in ${rentIn()} day${rentIn() > 1 ? 's' : ''} and you're short.`);
+  if (nx && S.cash >= nx.move) tips.push(`You can afford to move to the ${nx.name}.`);
+  for (const n of r.exNotes) tips.push(n);
+  const repD = r.repTo - r.repFrom;
+  const line = (k, v, cls = '') => `<div class="rl"><span>${k}</span><span class="${cls}">${v}</span></div>`;
+  const banner = S.over ? `<div class="banner" style="border-color:var(--tomato)"><b>Out of business</b>${S.overWhy} Start a new game below.</div>` : '';
+  $('#main').innerHTML = `<div style="display:flex;flex-direction:column;gap:18px">
+    ${banner}
+    <div class="receipt">
+      <h2>Half Shot Café</h2>
+      <div class="c">${r.place}<br>Day ${r.day} · ${r.dow} · ${r.wlabel}${r.earth ? ', ' + r.weather.temp + '°F' : ''}</div>
+      ${line('Visitors', r.visitors)}
+      ${line('Served', r.served)}
+      ${line('Walked out', lostAll)}
+      ${L.price ? line('&nbsp;&nbsp;prices too high', L.price) : ''}
+      ${L.line ? line('&nbsp;&nbsp;line too long', L.line) : ''}
+      ${L.wait ? line('&nbsp;&nbsp;gave up waiting', L.wait) : ''}
+      ${L.stock ? line('&nbsp;&nbsp;sold out', L.stock) : ''}
+      ${line('Best seller', r.best)}
+      ${line('Avg wait', r.avgWait.toFixed(1) + ' min')}
+      ${line('Croissants sold / tossed', r.pastrySold + ' / ' + r.tossed)}
+      <hr>
+      ${line('Sales', money(r.sales))}
+      ${line('Tips', money(r.tips))}
+      ${r.exInc || r.exUp ? line('Expansion income', money(r.exInc), 'pos') + line('Expansion upkeep', '−' + money(r.exUp), 'neg') : ''}
+      ${line('Wages', '−' + money(r.wages), r.wages ? 'neg' : '')}
+      ${r.rentBill ? line('Monthly rent', '−' + money(r.rentBill), 'neg') : ''}
+      <hr>
+      <div class="rl tot"><span>Net for the day</span><span class="${r.net >= 0 ? 'pos' : 'neg'}">${money(r.net)}</span></div>
+      ${line('Cash on hand', money0(S.cash))}
+      ${cur.rent && !S.over ? line('Next rent due', 'in ' + rentIn() + ' day' + (rentIn() > 1 ? 's' : '')) : ''}
+      ${line('Reputation', Math.round(r.repFrom) + ' → ' + Math.round(r.repTo) + ' (' + (repD >= 0 ? '+' : '') + repD.toFixed(1) + ')', repD >= 0 ? 'pos' : 'neg')}
+      ${tips.length ? `<hr><ul class="tips">${tips.map(t => `<li>${t}</li>`).join('')}</ul>` : ''}
+      <div class="c" style="margin:14px 0 0">Thank you, come again</div>
+    </div>
+    ${S.over ? '' : `<button class="big" data-act="next">Plan day ${S.day} · ${DAYS[(S.day - 1) % 7]}</button>`}
+  </div>`;
+}
+
+/* ---------- glue ---------- */
+function render() {
+  applyTheme();
+  renderStats();
+  if (phase === 'plan') renderPlan();
+  else if (phase === 'report') renderReport();
+  $('#resetwrap').innerHTML = confirmReset
+    ? `Start over? <button class="link" data-act="reset-yes" style="color:var(--mustard)">Yes, wipe the shop</button> · <button class="link" data-act="reset-no">Cancel</button>`
+    : `<button class="link" data-act="reset">New game</button>`;
+}
+
+document.addEventListener('click', e => {
+  const b = e.target.closest('[data-act]'); if (!b || b.disabled) return;
+  const a = b.dataset.act, id = b.dataset.id;
+  if (a === 'tab') { tab = id; confirmMove = false; renderPlan(); return; }
+  if (a === 'price') {
+    const st = priceStep(), base = id === 'pastry' ? PASTRY_BASE : DMAP[id].base;
+    S.prices[id] = roundTo(clamp(S.prices[id] + st * +b.dataset.d, st, base * LC().pm * 4), st); save(); renderPlan(); return;
+  }
+  if (a === 'buy') { const c = supCost(id), n = +b.dataset.n; if (S.cash >= c * n) { S.cash -= c * n; S.inv[id] += SUP[id].pack * n; save(); render(); } return; }
+  if (a === 'hire') { if (S.staff < LC().staff) { S.staff++; save(); render(); } return; }
+  if (a === 'fire') { if (S.staff > 1) { S.staff--; save(); render(); } return; }
+  if (a === 'upg') { const u = UPG.find(x => x.id === id); if (!S.up[id] && S.cash >= u.cost) { S.cash -= u.cost; S.up[id] = true; save(); render(); } return; }
+  if (a === 'exp') { const x = EMAP[id], L0 = S.exp[id] || 0, c = expCost(x, L0 + 1); if (x.tier <= S.tier && L0 < MAXLVL && S.cash >= c) { S.cash -= c; S.exp[id] = L0 + 1; save(); render(); } return; }
+  if (a === 'move') { confirmMove = true; renderPlan(); return; }
+  if (a === 'move-no') { confirmMove = false; renderPlan(); return; }
+  if (a === 'move-yes') { doMove(); return; }
+  if (a === 'open') { startDay(); renderStats(); return; }
+  if (a === 'speed') { sim.speed = +b.dataset.v; document.querySelectorAll('.speeds button').forEach(x => x.setAttribute('aria-pressed', x === b)); return; }
+  if (a === 'next') { phase = 'plan'; tab = 'supplies'; render(); scrollTo(0, 0); return; }
+  if (a === 'reset') { confirmReset = true; render(); return; }
+  if (a === 'reset-no') { confirmReset = false; render(); return; }
+  if (a === 'reset-yes') { confirmReset = false; S = newGame(); sim = null; phase = 'plan'; tab = 'menu'; welcome = null; confirmMove = false; save(); render(); scrollTo(0, 0); return; }
+});
+
+render();
+})();
+</script>
+</body>
+</html>
